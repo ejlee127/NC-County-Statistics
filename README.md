@@ -13,19 +13,24 @@ NC county Census data analysis for multiple years.  This dashboard will provide 
 ## Project Rational:
 NC Census data provides valuable insight into growth and demographic changes overtime. We will develop consolidated dashboard using various tools and technique.  Since we will be looking into historical data compared to new data structure this provide unique opportunity to develop dashboard with various data structures. 
 
-## Screenshot of the metadata(expected):
-[Example for final page](images/metadata_example.png)
-[Example for main map](images/Screenshot\ 2012.png)
+## Screenshot of the metadata(goal):
+* [Example for final page](images/metadata_example.png)
+* [Example for main map](images/Screenshot 2012.png)
 
 ## A sketch of final design: 
 [image](images/sketch_final_design.png)
 
 ## High level file and data flow:
-[Files relations](images/files_data1.png)
-[Data flow 1](images/files_data2.png)
-[Data flow 2](images/files_data3.png)
+
+    [Files relations](images/files_data1.png)
+
+    [Data flow 1](images/files_data2.png)
+
+    [Data flow 2](images/files_data3.png)
+
 
 ## Links
+
 ### datasets:
 * [Census](https://api.census.gov/)
 * [Community Business Pattern(CBP)](https://www.census.gov/programs-surveys/cbp.html)
