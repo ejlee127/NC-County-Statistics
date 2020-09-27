@@ -55,20 +55,21 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     return result;
   }
 
-url = "https://api.census.gov/data/2018/cbp?get=NAICS2017_LABEL,NAICS2017,GEO_ID,LFO,LFO_LABEL,EMPSZES_LABEL,EMPSZES,EMP&for=county:*&in=state:37"
+//url = "https://api.census.gov/data/2018/cbp?get=NAICS2017_LABEL,NAICS2017,GEO_ID,LFO,LFO_LABEL,EMPSZES_LABEL,EMPSZES,EMP&for=county:*&in=state:37"
 // url = "https://api.census.gov/data/2012/cbp?get=NAICS2012_TTL,GEO_TTL,EMP,LFO_TTL,GEO_ID,ESTAB&for=county:*&in=state:37"
 //url = "https://api.census.gov/data/2010/cbp?get=NAICS2007_TTL,GEO_TTL,EMP,ESTAB&for=county:*&in=state:37";
 // url = "https://api.census.gov/data/1986/cbp?get=GEO_TTL,SIC_TTL,EMP,ESTAB&for=county:*&in=state:37";
 // url = "https://api.census.gov/data/1990/cbp?get=GEO_TTL,SIC_TTL,EMP,ESTAB&for=county:*&in=state:37";
+ url = "http://127.0.0.1:5000/get_census"
       // Perform an API call to the Citi Bike Station Information endpoint  1986 1990
-d3.json(url, function(county_info) {
-
+d3.json(url, function(county_data) {
+ var county_info = county_data.result;
   console.log(county_info);
 // Use this link to get the geojson data.
-var link = "https://opendata.arcgis.com/datasets/d192da4d0ac249fa9584109b1d626286_0.geojson";
+var link = "http://127.0.0.1:5000/get_geo"
 
   // Grabbing our GeoJSON data..
-  d3.json(link, function(data) {
+   d3.json(link, function(data) {
 
     // Create a new station object with properties of both station objects
     // var station = Object.assign({}, county_info[i], data[i]);
