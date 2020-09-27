@@ -15,7 +15,7 @@ NC Census data provides valuable insight into growth and demographic changes ove
 
 ## Screenshot of the metadata(goal):
 * [Example for final page](images/metadata_example.png)
-* [Example for main map](images/Screenshot 2012.png)
+* [Example for main map](images/Screenshot-2012.png)
 
 ## A sketch of final design: 
 [image](images/sketch_final_design.png)
