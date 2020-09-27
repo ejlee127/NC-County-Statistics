@@ -22,11 +22,11 @@ NC Census data provides valuable insight into growth and demographic changes ove
 
 ## High level file and data flow:
 
-    [Files relations](images/files_data1.png)
+   [Files relations](images/files_data1.png)
 
-    [Data flow 1](images/files_data2.png)
+   [Data flow 1](images/files_data2.png)
 
-    [Data flow 2](images/files_data3.png)
+   [Data flow 2](images/files_data3.png)
 
 
 ## Links
