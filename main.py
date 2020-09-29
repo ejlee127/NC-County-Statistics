@@ -19,7 +19,24 @@ app.config['CORS_ORIGINS'] = '*'
 # temporary mongo DB
 app.config["MONGO_URI"] = "mongodb://localhost:27017/censusdb"
 
+# run in debug mode
+app.debug = True
+
 mongo = PyMongo(app)
+
+years = []
+
+def order_list(censusJson):
+    ord = {}
+    # put the array into a dictionary format for easier reference in JS
+    for ci in censusJson:
+        # get the county name as the key
+        ckey = ci[0].split()[0]
+        ord[ckey] = ci
+        
+    return ord
+
+
 
 #This is not recommended in production
 #What would happen is every time you visit the root route it would load the DB again with all the data
@@ -31,25 +48,50 @@ def reload_geo():
 
     geojson = json.loads(json_util.dumps(response.json()))
     return jsonify(geojson)
-
+ 
 @app.route("/reload_census", methods=["GET"])
+@cross_origin()
 def reload_census():
+    year = '1986'
     censuscol = mongo.db.census
-    response = requests.get("https://api.census.gov/data/1986/cbp?get=GEO_TTL,SIC_TTL,EMP,ESTAB&for=county:*&in=state:37")
-    print(response.json())
+    censuslink = "https://api.census.gov/data/" + year + "/cbp?get=GEO_TTL,SIC_TTL,EMP,ESTAB&for=county:*&in=state:37"
+    response = requests.get(censuslink)
     responseJson = response.json()
-    censusyear = {"year" : 1986, "result" : responseJson}
-    censuscol.insert(censusyear)
-    return "finished"
+    # print(responseJson)
+    #orderJson = order_list(responseJson)
+    # print(orderJson)
+    censusyear = {"year": year, "result" : responseJson}
+    myquery = { "year": year }
+    x = censuscol.count_documents(myquery)
+    #x = censuscol.find(myquery)
+    print(x)
+    if x ==0:
+        censuscol.insert(censusyear)
+        years.append(year)
+        result = "new"
+    else:
+        newvalues = { "$set": { "result": responseJson } }
+        censuscol.update(myquery,newvalues)
+        result = "update"
+    return result
 
 
 
 @app.route("/get_census", methods=['GET'])
 @cross_origin()
-def allbreeds():
+def get_census():
     censuscol = mongo.db.census
     censusdoc = censuscol.find_one()
     censusjson = json.loads(json_util.dumps(censusdoc))
+    return jsonify(censusjson)
+
+@app.route("/get_county_data", methods=['GET'])
+@cross_origin()
+def get_county_data():
+    censuscol = mongo.db.census
+    censusdoc = censuscol.find_one({"year" : years[0]})
+    censusjson = json.loads(json_util.dumps(censusdoc))
+
     return jsonify(censusjson)
 
 if __name__ == "__main__":
