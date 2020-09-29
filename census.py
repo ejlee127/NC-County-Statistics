@@ -114,7 +114,7 @@ def emp_by_year(year):
 def emp_by_county(county):
     emp_ct = county_all_years(county)
     emp_ct_df = pd.DataFrame({
-        "County" : ["183"]*len(emp_ct),
+        "County" : [county]*len(emp_ct),
         "Year" : np.arange(1986,2018),
         "EMP" : emp_ct
     })
