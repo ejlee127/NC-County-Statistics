@@ -1,7 +1,30 @@
+
+
+init_data();
+
+function init_data() {
+  url = "http://127.0.0.1:5000/reload_census"
+      // Perform an API call to the get the data into MongoDB
+  d3.json(url, function(call_status) {
+      console.log(call_status);
+  });
+  return;
+}
+
+function fill_in_popup(name, numb,county_d){
+
+  pop_html = "<h1>" + name + "</h1> <hr> <h2>County Number: " ;
+  pop_html = pop_html + numb + "</h2> <br> <h2>Employment: " ;
+  var c_emp = determine_size(name,county_d);
+  pop_html = pop_html + c_emp;
+  return pop_html;
+}
+
+
 // Creating map object
 var myMap = L.map("map", {
   center: [34.72, -79.17],
-  zoom: 5
+  zoom: 6
 });
 
 // Adding tile layer
@@ -14,44 +37,127 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   accessToken: API_KEY
 }).addTo(myMap);
 
+function change_panels(county_number) {
 
-// Function that will determine the color of a neighborhood based on the borough it belongs to
+  // holding function to change the side panels.
+  console.log(county_number)
+  return;
+}
+
+function determine_size(county,county_d){
+
+  var size = 0;
+  if (county_d[0][0] === "NAICS2007_TTL" || county_d[0][0] === "NAICS2012_TTL" ) {
+    county = county + " County, North Carolina";
+    for (var i= 1;i < county_d.length-1; i++) {
+     if (county === county_d[i][1]) {
+       size = parseInt(county_d[i][2]);
+     }
+    }
+   }
+    else {
+     county = county + " County, NC";
+     for (var i= 1;i < county_d.length-1; i++) {
+      if (county === county_d[i][0]) {
+        size = parseInt(county_d[i][2]);
+      }
+    }
+   }
+   console.log(size);
+   return size;
+}
+
+
+// Function that will determine the color of a county based on the number of employees it has
  function chooseColor(county, county_info) {
    var result;
-   var size = 0;
-   if (county_info[0][0] === "NAICS2007_TTL" || county_info[0][0] === "NAICS2012_TTL" ) {
-     county = county + " County, North Carolina";
-     for (var i= 1;i < county_info.length-1; i++) {
-      if (county === county_info[i][1]) {
-        size = parseInt(county_info[i][2]);
-      }
-     }
-    }
-     else {
-      county = county + " County, NC";
-      for (var i= 1;i < county_info.length-1; i++) {
-       if (county === county_info[i][0]) {
-         size = parseInt(county_info[i][2]);
-       }
-     }
-    }
-  if (size < 10000) {
-    result = "blue";} 
-    else {
-      if (size < 100000) {
-        result = "green" ;}
-      else {
-        if (size < 200000) {
-          result = "pink" ; }
-        else {
-          if (size < 300000) {
-            result = "red" ; }
-          else {
-            result = 'purple';}
-        }
-      }
-    }
-    console.log(county,result)
+  //  var size = 0;
+  //  if (county_info[0][0] === "NAICS2007_TTL" || county_info[0][0] === "NAICS2012_TTL" ) {
+  //    county = county + " County, North Carolina";
+  //    for (var i= 1;i < county_info.length-1; i++) {
+  //     if (county === county_info[i][1]) {
+  //       size = parseInt(county_info[i][2]);
+  //     }
+  //    }
+  //   }
+  //    else {
+  //     county = county + " County, NC";
+  //     for (var i= 1;i < county_info.length-1; i++) {
+  //      if (county === county_info[i][0]) {
+  //        size = parseInt(county_info[i][2]);
+  //      }
+  //    }
+  //   }
+  size = determine_size(county, county_info);
+   var size1 = size / 1000;
+   switch (parseInt(size1)) {
+     case 0:
+       result = "#66ffff";
+       break;
+     case 1:
+       result = "#66ffd9";
+       break;
+     case 2:
+       result = "#80ffff";
+       break;
+     case 3:
+       result = "#66ffb3";
+       break;
+     case 4:
+       result = "#66ff8c";
+       break;
+     case 5:
+       result = "#66ff66";
+       break;
+     case 6:
+       result = "#8cff66";
+       break;
+     case 7:
+       result = "#b3ff66";
+       break;
+     case 8:
+       result = "#d9ff66";
+       break;
+     case 9:
+       result = "#ffff66";
+       break;
+     default:
+      size1 = size1 / 10;
+      switch (parseInt(size1)) {
+        case 0:
+          result = "#ffd966";
+          break;
+        case 1:
+          result = "#ffb366";
+          break;
+        case 2:
+          result = "#ff8c66";
+          break;
+        case 3:
+          result = "#ff6666";
+          break;
+        case 4:
+          result = "#ff668c";
+          break;
+        case 5:
+          result = "#ff66b3";
+          break;
+        case 6:
+          result = "#ff66d9";
+          break;
+        case 7:
+          result = "#ff66ff";
+          break;
+        case 8:
+          result = "#d966ff";
+          break;
+        case 9:
+          result = "#b366ff";
+          break;
+        default:
+          result = "#8c66ff"
+      }                  
+  }
     return result;
   }
 
@@ -107,14 +213,18 @@ var link = "http://127.0.0.1:5000/get_geo"
           },
           // When a feature (neighborhood) is clicked, it is enlarged to fit the screen
           click: function(event) {
-            myMap.fitBounds(event.target.getBounds());
+            myMap.fitBounds(event.target.getBounds())
+            console.log(this.feature.properties);
+            change_panels(this.feature.properties.CNTY_NBR);
           }
         });
         // Giving each feature a pop-up with information pertinent to it
-        layer.bindPopup("<h1>" + feature.properties.CountyName + "</h1> <hr> <h2>County Number: " + feature.properties.CNTY_NBR + "</h2>");
+        layer.bindPopup(fill_in_popup(feature.properties.CountyName,feature.properties.CNTY_NBR,county_info));
 
       }
     }).addTo(myMap);
   });
 });
+
+
 
