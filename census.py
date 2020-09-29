@@ -93,7 +93,8 @@ def county_all_years(county):
 ## For given year, collect EMP data for all counties
 
 def emp_by_year(year):
-    url = set_url(2018)
+    
+    url = set_url(year)
 
     try:
         response = requests.get(url)
