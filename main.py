@@ -48,7 +48,7 @@ def reload_geo():
 
     geojson = json.loads(json_util.dumps(response.json()))
     return jsonify(geojson)
-
+ 
 @app.route("/reload_census", methods=["GET"])
 @cross_origin()
 def reload_census():
