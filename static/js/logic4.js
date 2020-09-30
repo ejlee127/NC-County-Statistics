@@ -161,18 +161,14 @@ function determine_size(county,county_d){
     return result;
   }
 
-//url = "https://api.census.gov/data/2018/cbp?get=NAICS2017_LABEL,NAICS2017,GEO_ID,LFO,LFO_LABEL,EMPSZES_LABEL,EMPSZES,EMP&for=county:*&in=state:37"
-// url = "https://api.census.gov/data/2012/cbp?get=NAICS2012_TTL,GEO_TTL,EMP,LFO_TTL,GEO_ID,ESTAB&for=county:*&in=state:37"
-//url = "https://api.census.gov/data/2010/cbp?get=NAICS2007_TTL,GEO_TTL,EMP,ESTAB&for=county:*&in=state:37";
-// url = "https://api.census.gov/data/1986/cbp?get=GEO_TTL,SIC_TTL,EMP,ESTAB&for=county:*&in=state:37";
-// url = "https://api.census.gov/data/1990/cbp?get=GEO_TTL,SIC_TTL,EMP,ESTAB&for=county:*&in=state:37";
+
  url = "http://127.0.0.1:5000/get_census"
       // Perform an API call to the Citi Bike Station Information endpoint  1986 1990
 d3.json(url, function(county_data) {
  var county_info = county_data.result;
   console.log(county_info);
 // Use this link to get the geojson data.
-var link = "http://127.0.0.1:5000/get_geo"
+var link = "http://127.0.0.1:5000/get2_geo"
 
   // Grabbing our GeoJSON data..
    d3.json(link, function(data) {
