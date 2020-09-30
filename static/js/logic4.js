@@ -1,18 +1,33 @@
 
 
-init_data(); 
-
 function init_data() {
+
+  url = "http://127.0.0.1:5000/get_years"
+  // Perform an API call to the get the years stored from MongoDB
+  d3.json(url, function(data) {
+    console.log(data)
+      //Create the drop down list of subject IDs
+    document.getElementById("selDataset").innerHTML = generatetxt(data);
+
+  });
   url = "http://127.0.0.1:5000/reload_census"
       // Perform an API call to the get the data into MongoDB
   d3.json(url, function(call_status) {
       console.log(call_status);
   });
+
+  url = "http://127.0.0.1:5000/reload_geo"
+    // Perform an API call to the get the data into MongoDB
+  d3.json(url, function(call_status) {
+    console.log(call_status);
+  });
+
+
   return;
 }
 
 function fill_in_popup(name, numb,county_d){
-
+  console.log("pop" + name);
   pop_html = "<h1>" + name + "</h1> <hr> <h2>County Number: " ;
   pop_html = pop_html + numb + "</h2> <br> <h2>Employment: " ;
   var c_emp = determine_size(name,county_d);
@@ -21,10 +36,37 @@ function fill_in_popup(name, numb,county_d){
 }
 
 
+function optionChanged(value) {
+  buildMap(value);
+  
+}
+
+
+/* function to generate the text for the drop downs.  This function creates a text string
+  used to populate the drop down. 
+  Input:
+    keylist - array of strings containing the year
+
+  Returns:
+    text - text string with html encoding with the format of 
+      <option> year </option>
+*/
+function generatetxt(keylist) {
+  // set up variables being used in function.
+  var text = [], i;
+
+  // loop through array to populate the drop down.
+  for (i = 0; i < keylist.length; i++) {
+    text += "<option>" + keylist[i] + "</option>";
+  }
+  return text
+} 
+
+
 // Creating map object
 var myMap = L.map("map", {
   center: [34.72, -79.17],
-  zoom: 6
+  zoom: 7
 });
 
 // Adding tile layer
@@ -47,11 +89,12 @@ function change_panels(county_number) {
 function determine_size(county,county_d){
 
   var size = 0;
-  if (county_d[0][0] === "NAICS2007_TTL" || county_d[0][0] === "NAICS2012_TTL" ) {
+  console.log(county_d[0])
+  if (county_d[0][2] != "state" ) {
     county = county + " County, North Carolina";
     for (var i= 1;i < county_d.length-1; i++) {
-     if (county === county_d[i][1]) {
-       size = parseInt(county_d[i][2]);
+     if (county === county_d[i][0] && '00' === county_d[i][2]) {
+       size = parseInt(county_d[i][1]);
      }
     }
    }
@@ -59,11 +102,11 @@ function determine_size(county,county_d){
      county = county + " County, NC";
      for (var i= 1;i < county_d.length-1; i++) {
       if (county === county_d[i][0]) {
-        size = parseInt(county_d[i][2]);
+        size = parseInt(county_d[i][1]);
       }
     }
    }
-   console.log(size);
+   console.log(county,size);
    return size;
 }
 
@@ -71,24 +114,7 @@ function determine_size(county,county_d){
 // Function that will determine the color of a county based on the number of employees it has
  function chooseColor(county, county_info) {
    var result;
-  //  var size = 0;
-  //  if (county_info[0][0] === "NAICS2007_TTL" || county_info[0][0] === "NAICS2012_TTL" ) {
-  //    county = county + " County, North Carolina";
-  //    for (var i= 1;i < county_info.length-1; i++) {
-  //     if (county === county_info[i][1]) {
-  //       size = parseInt(county_info[i][2]);
-  //     }
-  //    }
-  //   }
-  //    else {
-  //     county = county + " County, NC";
-  //     for (var i= 1;i < county_info.length-1; i++) {
-  //      if (county === county_info[i][0]) {
-  //        size = parseInt(county_info[i][2]);
-  //      }
-  //    }
-  //   }
-  size = determine_size(county, county_info);
+   size = determine_size(county, county_info);
    var size1 = size / 1000;
    switch (parseInt(size1)) {
      case 0:
@@ -161,22 +187,22 @@ function determine_size(county,county_d){
     return result;
   }
 
+function buildMap(year) {
 
- url = "http://127.0.0.1:5000/get_census"
-      // Perform an API call to the Citi Bike Station Information endpoint  1986 1990
+url = "http://127.0.0.1:5000/get_census/" + year
+      // Perform an API call to get the census daa for the year idnetified
+
 d3.json(url, function(county_data) {
+
  var county_info = county_data.result;
-  console.log(county_info);
+  console.log(county_data.result);
+  
 // Use this link to get the geojson data.
-var link = "http://127.0.0.1:5000/get2_geo"
+var link = "http://127.0.0.1:5000/get_geo"
 
   // Grabbing our GeoJSON data..
    d3.json(link, function(data) {
 
-    // Create a new station object with properties of both station objects
-    // var station = Object.assign({}, county_info[i], data[i]);
-    console.log(data);
-    console.log(data.features)
     // Creating a geoJSON layer with the retrieved data
     L.geoJson(data, {
       // Style each feature (in this case a neighborhood)
@@ -221,6 +247,6 @@ var link = "http://127.0.0.1:5000/get2_geo"
     }).addTo(myMap);
   });
 });
+}
 
-
-
+init_data(); 

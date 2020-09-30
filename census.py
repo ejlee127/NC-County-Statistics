@@ -104,10 +104,10 @@ def emp_by_year(year):
     except:
         print(f"Found error")
 
-    df = pd.DataFrame(census_data, columns=census_data[0])
-    emp_df=df.drop(0).drop("state",axis=1)
+    #df = pd.DataFrame(census_data, columns=census_data[0])
+    #emp_df=df.drop(0).drop("state",axis=1)
 
-    return emp_df
+    return census_data
 
 
 ## For given county, collect EMP data for all years
