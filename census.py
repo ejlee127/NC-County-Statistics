@@ -6,7 +6,7 @@ import json
 import time
 
 #----- Import API key ---------------
-from datasets/config import census_api_key
+from config import census_api_key
 
 #----- Define functions
 ## Set a naics code query to restrict the API call only for 2-digit business codes
