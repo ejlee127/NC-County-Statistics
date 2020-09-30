@@ -6,11 +6,11 @@ import json
 from pymongo import MongoClient
 from gridfs import GridFS
 from bson import objectid, json_util, BSON
-import importlib
+import census as ce
 
-moduleName = 'census'
-importlib.import_module(moduleName)
 
+
+years= ['1986','1988','1990','1992','1994','1996','1998','2000','2002','2004','2006','2008','2010','2012','2014','2016','2017','2018']
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -30,7 +30,6 @@ app.debug = True
 
 mongo = PyMongo(app)
 
-years = []
 db = MongoClient().mygrid 
 fs = GridFS(db)
 
@@ -65,66 +64,70 @@ def get_geo():
 
 @app.route("/reload_geo", methods=["GET"])
 def reload_geo():
-    response = requests.get("https://opendata.arcgis.com/datasets/d192da4d0ac249fa9584109b1d626286_0.geojson")
+    # check to see if there is an exisitng file.  If so than do not reload
+    col = db.fs.files.find_one()
 
-    # GridFS stored BSON binary files, the fucntion to do that is BSON.encode
-    geojson = BSON.encode(response.json())
+    status = "existing"
 
-    # then we store it with the put()
-    fs.put(geojson)
+    if col == None:
 
-    #geocol.insert_one(geojson)
+        response = requests.get("https://opendata.arcgis.com/datasets/d192da4d0ac249fa9584109b1d626286_0.geojson")
 
-    return "loaded"
+        # GridFS stored BSON binary files, the fucntion to do that is BSON.encode
+        geojson = BSON.encode(response.json())
 
-@app.route("/get2_geo", methods=["GET"])
-def get2_geo():
-    #geocol = mongo.db.geo 
-    response = requests.get("https://opendata.arcgis.com/datasets/d192da4d0ac249fa9584109b1d626286_0.geojson")
+        # then we store it with the put()
+        fs.put(geojson)
 
-    geojson = response.json()
+        # set the status
+        status = "new"
 
-    #geocol.insert_one(geojson)
+    return status
 
-    return jsonify(geojson)
 
 @app.route("/reload_census", methods=["GET"])
 @cross_origin()
 def reload_census():
-    year = '1986'
+    #years= ['1986','1988','1990','1992','1994','1996','1998','2000','2002','2004','2006','2008','2010','2012','2014','2016','2017','2018']
+
+    # censusyears = mongo.db.censusyr
+    # doc = censusyears.find_one()
+    # yearBson = json.loads(json_util.dumps(doc))
+    # print(yearBson)
+    # yearjson = jsonify(yearBson)
+ 
     censuscol = mongo.db.census
-    censuslink = "https://api.census.gov/data/" + year + "/cbp?get=GEO_TTL,SIC_TTL,EMP,ESTAB&for=county:*&in=state:37"
-    response = requests.get(censuslink)
-    responseJson = response.json()
-    # print(responseJson)
-    #orderJson = order_list(responseJson)
-    # print(orderJson)
-    censusyear = {"year": year, "result" : responseJson}
-    myquery = { "year": year }
-    x = censuscol.count_documents(myquery)
-    #x = censuscol.find(myquery)
-    print(x)
-    if x == 0:
-        censuscol.insert(censusyear)
-        years.append(year)
-        result = "new"
-    else:
-        newvalues = { "$set": { "result": responseJson } }
-        censuscol.update(myquery,newvalues)
-        result = "update"
+    
+    for year in years:
+        myquery = { "year": year }
+        x = censuscol.count_documents(myquery)
+        if x == 0:
+            responseJson = ce.emp_by_year(int(year))
+            censusyear = {"year": year, "result" : responseJson}
+            censuscol.insert(censusyear)
+            result = "new"
+        else:  # don't refresh if we have the data.  Eventually we would want to change this
+            result = "existing"
+
     return result
 
 
-
-@app.route("/get_census", methods=['GET'])
+@app.route("/get_census/<year>", methods=['GET'])
 @cross_origin()
-def get_census():
-    censuscol = mongo.db.census
-    censusdoc = censuscol.find_one()
-    censusjson = json.loads(json_util.dumps(censusdoc))
-    return jsonify(censusjson)
+def get_census(year):
 
-@app.route("/get_county_data", methods=['GET'])
+    censuscol = mongo.db.census
+    myquery = { "year": year }
+    x = censuscol.count_documents(myquery)
+    if x == 0:  # need to change to call refresh
+        result = "none"
+    else:
+        censusdoc = censuscol.find_one(myquery)
+        censusjson = json.loads(json_util.dumps(censusdoc))
+        result = jsonify(censusjson)
+    return result
+
+@app.route("/get_county_data/<county>", methods=['GET'])
 @cross_origin()
 def get_county_data():
     censuscol = mongo.db.census
@@ -132,6 +135,17 @@ def get_county_data():
     censusjson = json.loads(json_util.dumps(censusdoc))
 
     return jsonify(censusjson)
+
+@app.route("/get_years", methods=['GET'])
+@cross_origin()
+def get_years():
+
+    # censusyears = mongo.db.censusyr
+    # doc = censusyears.find_one()
+    # yearjson = json.loads(json_util.dumps(doc))
+    # print(yearjson)
+    print(years)
+    return jsonify(years)
 
 if __name__ == "__main__":
     app.run()

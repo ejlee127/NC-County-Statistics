@@ -17,10 +17,22 @@
 
   </head>
   <body>
-
-    <!-- map div -->
-    <div id="map"></div>
-
+    <div class="row">
+      <div class="col-md-12">
+        <div class="well">
+          <h5>Select the year:</h5>
+          <select id="selDataset" onchange="optionChanged(this.value)">
+        </select>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- <div class="row">
+      <div class="col-md-12"> -->
+        <!-- map div -->
+        <div id="map"></div>
+      <!-- </div>
+    </div> -->
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"
