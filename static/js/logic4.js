@@ -22,7 +22,6 @@ function init_data() {
     console.log(call_status);
   });
 
-
   return;
 }
 
