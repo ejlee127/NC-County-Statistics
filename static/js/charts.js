@@ -68,21 +68,22 @@ function init_barChart(empNum) {
     
 }
 
-// Action from 'selection' 
-function optionChanged(year) {
-    url = "http://127.0.0.1:5000/get_census/" + year
+// commented out and code moved to main loop
+// // Action from 'selection' 
+// function optionChanged(year) {
+//     url = "http://127.0.0.1:5000/get_census/" + year
 
-    // Perform an API call to get the census daa for the year idnetified
+//     // Perform an API call to get the census daa for the year idnetified
 
-    d3.json(url, function(data) {
-        console.log(data.result)
+//     d3.json(url, function(data) {
+//         console.log(data.result)
 
-        ncData = empNCxy(data.result);
-        init_barChart(ncData)
+//         ncData = empNCxy(data.result);
+//         init_barChart(ncData)
         
-    });
+//     });
     
-};
+// };
 
 // Find total number of employees for each business category
 // --- empdata has all counties data
