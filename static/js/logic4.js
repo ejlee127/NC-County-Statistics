@@ -27,7 +27,7 @@ function init_data() {
 }
 
 function fill_in_popup(name, numb,county_d){
-  console.log("pop" + name);
+
   pop_html = "<h1>" + name + "</h1> <hr> <h2>County Number: " ;
   pop_html = pop_html + numb + "</h2> <br> <h2>Employment: " ;
   var c_emp = determine_size(name,county_d);
@@ -89,26 +89,40 @@ function change_panels(county_number) {
 function determine_size(county,county_d){
 
   var size = 0;
-  console.log(county_d[0])
-  if (county_d[0][2] != "state" ) {
+  var ind = 1;
+  var name_ind = 0;
+
+  if (county_d[0][2] == 'NAICS2012' || county_d[0][2] == 'NAICS2017') {
     county = county + " County, North Carolina";
     for (var i= 1;i < county_d.length-1; i++) {
-     if (county === county_d[i][0] && '00' === county_d[i][2]) {
-       size = parseInt(county_d[i][1]);
+     if (county === county_d[i][name_ind] && '00' === county_d[i][2]) {
+       size = parseInt(county_d[i][ind]);
      }
     }
    }
     else {
-     county = county + " County, NC";
-     for (var i= 1;i < county_d.length-1; i++) {
-      if (county === county_d[i][0]) {
-        size = parseInt(county_d[i][1]);
+     if (county_d[0][0] == 'NAICS1997_TTL' || county_d[0][0] == 'NAICS2002_TTL' ) {
+      ind += 1;
+      name_ind += 1;
+      suffix = county_d[1][name_ind].split(" ");
+      if (suffix.length == 3){
+        county = county + " County, NC";
+      }
+      else {
+        county = county + ", NC";
+      }
+     }
+     else {
+       county = county + " County, NC";
+     }
+     for (var i= 1;i < county_d.length-1; i++){ 
+      if (county === county_d[i][name_ind]) {
+        size = parseInt(county_d[i][ind]);
       }
     }
+    }
+    return size;
    }
-   console.log(county,size);
-   return size;
-}
 
 
 // Function that will determine the color of a county based on the number of employees it has
@@ -236,7 +250,7 @@ var link = "http://127.0.0.1:5000/get_geo"
           // When a feature (neighborhood) is clicked, it is enlarged to fit the screen
           click: function(event) {
             myMap.fitBounds(event.target.getBounds())
-            console.log(this.feature.properties);
+            // console.log(this.feature.properties);
             change_panels(this.feature.properties.CNTY_NBR);
           }
         });
