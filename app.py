@@ -43,17 +43,49 @@ def order_list(censusJson):
         
     return ord
 
+def deter_county(result,county,year):
+    size = 0
+    ind = 1
+    name_ind = 0
+    cnty = ""
+    first_data_row = 1
+    code = "none"
+    split_char = ' '
+    year_int = int(year)
+    if (year_int >= 2017):
+        code = '00'
+    elif (year_int >= 2012):
+        code = '00'
+    elif (year_int > 2007):
+        name_ind = 1
+        ind=2
+    elif (year_int >= 2002):
+        name_ind = 1
+        ind=2
+        split_char = ','
+    elif (year_int > 1997):
+        name_ind = 1
+        ind=2
 
+    cnty = county + split_char + result[first_data_row][name_ind].split(split_char,1)[1]
+    for county_d in result:
+        if (code == "none"):
+            if(cnty == county_d[name_ind]):
+                size = int(county_d[ind])
+                break
+        elif (cnty == county_d[name_ind] and code == county_d[2]):
+            size = int(county_d[ind])
+            break
 
+    return size
+      
+        
 #This is not recommended in production
 #What would happen is every time you visit the root route it would load the DB again with all the data
 #
 @app.route("/get_geo", methods=["GET"])
 def get_geo():
-    """geocol = mongo.db.geo 
 
-    geodoc = geocol.find_one()
-    geojson = json.loads(json_util.dumps(geodoc))"""
     #to acces the data first we need to get the colletion in where the files are stored
     col = db.fs.files.find_one()
     # once we have the object storing the file information, we can get the data and read it
@@ -88,16 +120,9 @@ def reload_geo():
 @app.route("/reload_census", methods=["GET"])
 @cross_origin()
 def reload_census():
-    #years= ['1986','1988','1990','1992','1994','1996','1998','2000','2002','2004','2006','2008','2010','2012','2014','2016','2017','2018']
-
-    # censusyears = mongo.db.censusyr
-    # doc = censusyears.find_one()
-    # yearBson = json.loads(json_util.dumps(doc))
-    # print(yearBson)
-    # yearjson = jsonify(yearBson)
  
     censuscol = mongo.db.census
-    
+#    test = ['2012','2018']
     for year in years:
         myquery = { "year": year }
         x = censuscol.count_documents(myquery)
@@ -129,22 +154,27 @@ def get_census(year):
 
 @app.route("/get_county_data/<county>", methods=['GET'])
 @cross_origin()
-def get_county_data():
-    censuscol = mongo.db.census
-    censusdoc = censuscol.find_one({"year" : years[0]})
-    censusjson = json.loads(json_util.dumps(censusdoc))
-
-    return jsonify(censusjson)
+def get_county_data(county):
+    result = []
+#    test = ['2002','2004']
+    for year in years:
+        censuscol = mongo.db.census
+        myquery = { "year": year }
+        x = censuscol.count_documents(myquery)
+        if x == 0:  # pull the county information
+            result.append(0)
+        else:
+            censusdoc = censuscol.find_one(myquery,{ "_id": 0, "result": 1 })
+            censusjson = json.loads(json_util.dumps(censusdoc))
+            result.append(deter_county(censusjson['result'],county,year))
+    county_info = {"year" : years,
+                    "size": result}
+    return jsonify(county_info)
 
 @app.route("/get_years", methods=['GET'])
 @cross_origin()
 def get_years():
 
-    # censusyears = mongo.db.censusyr
-    # doc = censusyears.find_one()
-    # yearjson = json.loads(json_util.dumps(doc))
-    # print(yearjson)
-    print(years)
     return jsonify(years)
 
 if __name__ == "__main__":
