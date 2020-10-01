@@ -128,11 +128,79 @@ function determine_size(county,county_d) {
 
 // Function that will determine the color of a county based on the number of employees it has
 function chooseColor(county, county_info) {
-
-  var size = determine_size(county, county_info)*100;
-  var result = "#"+size.toString(16)
-  return result;
-}
+  var result;
+  size = determine_size(county, county_info);
+  var size1 = size / 1000;
+  switch (parseInt(size1)) {
+    case 0:
+      result = "#66ffff";
+      break;
+    case 1:
+      result = "#66ffd9";
+      break;
+    case 2:
+      result = "#80ffff";
+      break;
+    case 3:
+      result = "#66ffb3";
+      break;
+    case 4:
+      result = "#66ff8c";
+      break;
+    case 5:
+      result = "#66ff66";
+      break;
+    case 6:
+      result = "#8cff66";
+      break;
+    case 7:
+      result = "#b3ff66";
+      break;
+    case 8:
+      result = "#d9ff66";
+      break;
+    case 9:
+      result = "#ffff66";
+      break;
+    default:
+     size1 = size1 / 10;
+     switch (parseInt(size1)) {
+       case 0:
+         result = "#ffd966";
+         break;
+       case 1:
+         result = "#ffb366";
+         break;
+       case 2:
+         result = "#ff8c66";
+         break;
+       case 3:
+         result = "#ff6666";
+         break;
+       case 4:
+         result = "#ff668c";
+         break;
+       case 5:
+         result = "#ff66b3";
+         break;
+       case 6:
+         result = "#ff66d9";
+         break;
+       case 7:
+         result = "#ff66ff";
+         break;
+       case 8:
+         result = "#d966ff";
+         break;
+       case 9:
+         result = "#b366ff";
+         break;
+       default:
+         result = "#8c66ff"
+     }                  
+ }
+   return result;
+ }
 
 function buildMap(year) {
 
