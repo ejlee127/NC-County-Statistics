@@ -190,7 +190,7 @@ def get_nc_data():
 #    test = ['2002','2004']
     for year in years:
         # there is no '999' entry for 2017,2018
-        if cint(year) >= 2017:
+        if int(year) >= 2017:
             break
         
         censuscol = mongo.db.census

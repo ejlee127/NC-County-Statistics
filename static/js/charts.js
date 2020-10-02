@@ -79,7 +79,6 @@ function empNCbar(empdata) {
 
     var ncAllcensus = empdata.filter( (d) => d[4] == '999' )
     ncAllcensus.sort( (a,b) => b[1] - a[1] );
-    console.log("after sort", ncAllcensus);
 
     // Set labels as naics codes    
     codes = ncAllcensus.map( (x) => naics_codes[x[2]] );
@@ -94,11 +93,7 @@ function empNCbar(empdata) {
     // Set colors for the bars
     var colors = codes.map( (d) => 'rgba(21, 67, 96, 0.6)' );
 
-
-
     // Updating chart with new data
-    console.log("in NCbar",myBarChart.data.labels);
-    console.log("in NCbar",myBarChart.data.datasets.data);
     myBarChart.data.labels = codes;
     myBarChart.data.datasets.forEach((dataset) => {
         dataset.label = codes.map( (c) => c);
@@ -106,8 +101,6 @@ function empNCbar(empdata) {
         console.log(dataset.data);
         dataset.backgroundColor = colors.map( (cl) => cl );
     });
-    console.log("in NCbar-after adding",myBarChart.data.labels);
-    console.log("in NCbar-after adding",myBarChart.data.datasets);
     myBarChart.update();
 }
 
@@ -121,9 +114,7 @@ function empNCtimeline(year) {
     url = "http://127.0.0.1:5000//get_nc_data/";
 
     d3.json(url, function(data){
-        console.log("in NCtimeline",data);
         var selData = data.filter( (d) => parseInt(d[0]) <= parseInt(year) );
-        console.log("in NCtimeline",selData);        
         var years = selData.map( (d) => d[0] );
         var values = selData.map( (d) => parseInt(d[1]) );
 
@@ -141,12 +132,13 @@ function empNCtimeline(year) {
 
 function countyCharts(county, census) {
 
+    //---- Update the bar chart: on the nc bar chart, adding county data
+    countyData = getCountyData(county, census)
+
+    //---- Update the line chart: on the nc line chart, adding county line
+
     var url = "http://127.0.0.1:5000//get_county_data/"+county;
     d3.json(url, function(data) {
-        console.log(data);
-
-        //---- Update the line chart
-        //-- On the nc line chart, adding county line
 
         // Removing existing county data in the chart
         if (myLineChart.data.datasets.length > 1 ) {
@@ -168,8 +160,27 @@ function countyCharts(county, census) {
         }
         myLineChart.data.datasets.push(newDataset);
         myLineChart.options.legend.display = true;
-        console.log("in county,", myLineChart.data.datasets);
         myLineChart.update();
     });
+}
+
+function getCountyData(county, census) {
+
+    //set the index
+    // cind : county index
+    // ein : emp index
+    // nind : nicas code index
+    sector = False
+    cind = 3 
+    eind = 1
+    nind = 2
+    result = []
+
+    console.log(census);
+    d3.json("datasets/combined_county_codes.json", function(codes){
+        console.log("in getCountyData", county, codes);
+        var countyNbr = codes[county].Census_NBR;
+        console.log("nbr", countyNbr);
+    })
 
 }
