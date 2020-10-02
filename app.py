@@ -128,7 +128,6 @@ def reload_census():
     for year in years:
         myquery = { "year": year }
         x = censuscol.count_documents(myquery)
-        print("In APPPP:::",year,x)
         if x == 0:
             responseJson = ce.emp_by_year(int(year))
             censusyear = {"year": year, "result" : responseJson}
