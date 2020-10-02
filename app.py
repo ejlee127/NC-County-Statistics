@@ -176,15 +176,21 @@ def get_county_data(county):
 @app.route("/get_nc_data/", methods=['GET'])
 @cross_origin()
 def get_nc_data():
+    # set the index
+    # sector : sub sectors exist or not
+    # cind : county index
+    # ein : emp index
+    # nind : nicas code index
     sector = False
-    ind = 3
+    cind = 3 
     eind = 1
+    nind = 2
     result = []
 
 #    test = ['2002','2004']
     for year in years:
         # there is no '999' entry for 2017,2018
-        if int(year) >= 2017:
+        if cint(year) >= 2017:
             break
         
         censuscol = mongo.db.census
@@ -197,7 +203,7 @@ def get_nc_data():
             censusjson = json.loads(json_util.dumps(censusdoc))
 
             if (int(year) >= 1998):
-                ind = 4
+                cind = 4
                 eind = 2
                 if (int(year) >= 2012 ):
                     sector = True
@@ -208,9 +214,9 @@ def get_nc_data():
             #Take the total employee number, i.e., when sector number=00
             
             if (sector):
-                selData = list(filter(lambda d: (d[ind] == '999') & (d[2] == '00'), empdata))
+                selData = list(filter(lambda d: (d[cind] == '999') & (d[nind] == '00'), empdata))
             else:
-                selData = list(filter(lambda d: d[ind] == '999', empdata))
+                selData = list(filter(lambda d: d[cind] == '999', empdata))
 
             # Append data to array
             result.append( [ year, selData[0][eind] ] )
