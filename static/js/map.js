@@ -79,10 +79,12 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   accessToken: API_KEY
 }).addTo(myMap);
 
-function change_panels(county_number) {
+function change_panels(county, year_emp) {
 
   // holding function to change the side panels.
-  console.log(county_number)
+  console.log(county);
+  countyCharts(county, year_emp);
+
   return;
 }
 
@@ -136,12 +138,18 @@ function chooseColor(county, county_info) {
 
 function buildMap(year) {
 
+  empNCtimeline(year);
+
   url = "http://127.0.0.1:5000/get_census/" + year
       // Perform an API call to get the census daa for the year idnetified
 
   d3.json(url, function(county_data) {
 
     var county_info = county_data.result;
+
+    empNCbar(county_info);
+
+
     //console.log(county_data.result);
   
     // Use this link to get the geojson data.
@@ -149,9 +157,6 @@ function buildMap(year) {
 
     // Grabbing our GeoJSON data..
     d3.json(link, function(data) {   
-
-      ncData = empNCxy(county_info);
-      init_barChart(ncData);
 
       // Creating a geoJSON layer with the retrieved data
       L.geoJson(data, {
@@ -187,7 +192,8 @@ function buildMap(year) {
             click: function(event) {
               // myMap.fitBounds(event.target.getBounds())
               // console.log(this.feature.properties);
-              change_panels(this.feature.properties.CNTY_NBR);
+              //change_panels(this.feature.properties.CNTY_NBR);
+              change_panels(this.feature.properties.CountyName, county_info);
             }
           });
           // Giving each feature a pop-up with information pertinent to it

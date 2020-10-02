@@ -10,7 +10,8 @@ import census as ce
 
 
 
-years= ['1986','1988','1990','1992','1994','1996','1998','2000','2002','2004','2006','2008','2010','2012','2014','2016','2017','2018']
+years= ['1986','1988','1990','1992','1994','1996','1998','2000','2002','2004','2006','2008','2010','2012','2013','2014','2015','2016','2017','2018']
+recent_years= ['2012', '2013','2014','2015','2016','2017','2018']
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -123,9 +124,11 @@ def reload_census():
  
     censuscol = mongo.db.census
 #    test = ['2012','2018']
+
     for year in years:
         myquery = { "year": year }
         x = censuscol.count_documents(myquery)
+        print("In APPPP:::",year,x)
         if x == 0:
             responseJson = ce.emp_by_year(int(year))
             censusyear = {"year": year, "result" : responseJson}
@@ -171,11 +174,54 @@ def get_county_data(county):
                     "size": result}
     return jsonify(county_info)
 
+@app.route("/get_nc_data/", methods=['GET'])
+@cross_origin()
+def get_nc_data():
+    sector = False
+    ind = 3
+    eind = 1
+    result = []
+
+#    test = ['2002','2004']
+    for year in years:
+        if int(year) >= 2017:
+            break
+        censuscol = mongo.db.census
+        myquery = { "year": year }
+        x = censuscol.count_documents(myquery)
+        if x == 0:  # pull the county information
+            result.append(0)
+        else:
+            censusdoc = censuscol.find_one(myquery,{ "_id": 0, "result": 1 })
+            censusjson = json.loads(json_util.dumps(censusdoc))
+
+            if (int(year) >= 1998):
+                ind = 4
+                eind = 2
+                if (int(year) >= 2012 ):
+                    sector = True
+                    eind = 1           
+            
+            empdata = censusjson['result']
+
+            #Take the total employee number, i.e., when sector number=00
+            
+            if (sector):
+                selData = list(filter(lambda d: (d[ind] == '999') & (d[2] == '00'), empdata))
+            else:
+                selData = list(filter(lambda d: d[ind] == '999', empdata))
+
+            # Append data to array
+            result.append( [ year, selData[0][eind] ] )
+            
+    return jsonify(result)
+
 @app.route("/get_years", methods=['GET'])
 @cross_origin()
 def get_years():
 
-    return jsonify(years)
+    #return jsonify(years)
+    return jsonify(recent_years)
 
 if __name__ == "__main__":
     app.run()
