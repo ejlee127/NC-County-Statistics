@@ -94,14 +94,7 @@ function empNCbar(empdata) {
     // Set colors for the bars
     var colors = codes.map( (d) => 'rgba(21, 67, 96, 0.6)' );
 
-    // Removing existing data in the chart
-    /*
-    console.log("in NCbar",myBarChart.data.labels);
-    console.log("in NCbar",myBarChart.data.datasets);
-    myBarChart.data.labels.pop();
-    myBarChart.data.datasets.forEach((dataset) => {
-        dataset.data.pop();
-    });*/
+
 
     // Updating chart with new data
     console.log("in NCbar",myBarChart.data.labels);
@@ -122,11 +115,8 @@ function empNCbar(empdata) {
 function empNCtimeline(year) {
 
     // Removing existing data
-    /*
-    myLineChart.data.labels.pop();
-    myLineChart.data.datasets.forEach((dataset) => {
-        dataset.data.pop();
-    });*/
+
+    myLineChart.options.legend.display = false;
 
     url = "http://127.0.0.1:5000//get_nc_data/";
 
@@ -157,6 +147,13 @@ function countyCharts(county, census) {
 
         //---- Update the line chart
         //-- On the nc line chart, adding county line
+
+        // Removing existing county data in the chart
+        if (myLineChart.data.datasets.length > 1 ) {
+            myBarChart.data.labels.pop();
+            myLineChart.data.datasets.pop();
+        }
+        
         //updating existing line chart look
         myLineChart.data.datasets.forEach( (dataset) => {
             dataset.label = 'NC State-wide'
