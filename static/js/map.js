@@ -102,14 +102,19 @@ function determine_size(county,county_d) {
     }
    }
     else {
-     if (county_d[0][0] == 'NAICS1997_TTL' || county_d[0][0] == 'NAICS2002_TTL' ) {
+
+     if (county_d[0][0] == 'NAICS1997_TTL' || county_d[0][0] == 'NAICS2002_TTL' || county_d[0][0] == 'NAICS2007_TTL' ) {
+
       ind += 1;
       name_ind += 1;
       suffix = county_d[1][name_ind].split(" ");
       if (suffix.length == 3){
         county = county + " County, NC";
       }
-      else {
+      else if (suffix.length == 4) {
+        county = county +  ' County, North Carolina'
+      }
+      else    {
         county = county + ", NC";
       }
      }
