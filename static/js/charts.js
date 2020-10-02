@@ -170,11 +170,10 @@ function getCountyData(county, census) {
     // cind : county index
     // ein : emp index
     // nind : nicas code index
-    sector = False
-    cind = 3 
-    eind = 1
-    nind = 2
-    result = []
+    var cind = 3 
+    var eind = 1
+    var nind = 2
+    var result = []
 
     console.log(census);
     d3.json("datasets/combined_county_codes.json", function(codes){
