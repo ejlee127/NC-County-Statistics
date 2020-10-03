@@ -92,6 +92,7 @@ function empNCbar(empdata) {
     var nind = 2 // naics-code index
 
     var ncInfo = empdata.filter( (d) => d[cind] == '999' )
+    console.log("in NCbar", ncInfo)
     ncInfo.sort( (a,b) => b[eind] - a[eind] );
 
     // Set labels as naics codes    
@@ -112,15 +113,12 @@ function empNCbar(empdata) {
         console.log(dataset.data);
         dataset.backgroundColor = codes.map( (d) => ncColor(0.6) );
     });
+    myBarChart.options.legend.display = false;
     myBarChart.update();
 }
 
 // Line chart of total employees of years from 1986 to the given year.
 function empNCtimeline(year) {
-
-    // Removing existing data
-
-    myLineChart.options.legend.display = false;
 
     url = "http://127.0.0.1:5000//get_nc_data/";
 
@@ -129,13 +127,14 @@ function empNCtimeline(year) {
         var years = selData.map( (d) => d[0] );
         var values = selData.map( (d) => parseInt(d[1]) );
 
-        // Adding new data with values
+        // Updating chart with new data
         myLineChart.data.labels = years;
         myLineChart.data.datasets.forEach((dataset) => {
            dataset.data = values.map( (v) => v );
            dataset.borderColor= ncColor(1);
-       });
-       myLineChart.update();
+        });
+        myLineChart.options.legend.display = false;
+        myLineChart.update();
     });       
 }
 

@@ -88,6 +88,34 @@ def county_all_years(county):
 
     return census
 
+
+## Set a url to query State-wide data
+def set_url_NC(year):
+    
+    cbp_url = f'https://api.census.gov/data/{year}/cbp?get='
+    
+    ## The quary variables vary in years
+    if (year >= 2017):
+        variables = "NAME,EMP"
+    elif (year >= 2012):
+        variables = "GEO_TTL,EMP"
+    elif (year > 2007):
+        variables = "NAICS2007_TTL,GEO_TTL,EMP"
+    elif (year > 2002):
+        variables = "NAICS2002_TTL,GEO_TTL,EMP"
+    elif (year > 1997):
+        variables = "NAICS1997_TTL,GEO_TTL,EMP"
+    else:
+        variables = "GEO_TTL,EMP"
+    
+    url = cbp_url+variables+"&for=state:37&key="+census_api_key
+    
+    # From 2012, there are subcategories upto 2~6 digits in NAICS codes. We collect only 2 digits codes.
+    if (year >= 2012):
+        url += set_naics_query(year)
+    
+    return url
+
 #---- Perform API calls
 
 ## For given year, collect EMP data for all counties
@@ -120,3 +148,20 @@ def emp_by_county(county):
         "EMP" : emp_ct
     })
     return emp_ct_df
+
+def emp_by_year_NC(year):
+        
+    url = set_url_NC(year)
+
+    try:
+        response = requests.get(url)
+        #print(response)
+        census_data = response.json()
+        #print(json.dumps(census_data, indent=4))
+    except:
+        print(f"Found error")
+
+    #df = pd.DataFrame(census_data, columns=census_data[0])
+    #emp_df=df.drop(0).drop("state",axis=1)
+
+    return census_data
