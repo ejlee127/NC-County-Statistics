@@ -61,7 +61,7 @@ var myLineChart = new Chart(ctx, {
         datasets: [{
             label: '',
             fill: false,
-            //fillColor: "rgba(255,12,32,0.5)",
+            fillColor: ncColor(0.6),
             //strokeColor: "rgba(255,12,32,1)",
             //pointColor: "rgba(255,12,32,1)",
             //pointStrokeColor: "#fff",
@@ -176,12 +176,10 @@ function countyCharts(year, county, census) {
             data: values
         }
         // Updating chart with new data
+        myBarChart.data.datasets.pop();
         myBarChart.data.labels = codes;
-        myBarChart.data.datasets.forEach((dataset) => {
-            dataset.label = codes.map( (c) => c);
-            dataset.data = values.map( (d) => d);
-            dataset.backgroundColor = codes.map( (d) => ncColor(0.6) );
-        });
+        myBarChart.data.datasets.push(newDataset);
+        myBarChart.options.legend.display = true;
         myBarChart.update();
     })
 
@@ -201,7 +199,8 @@ function countyCharts(year, county, census) {
         // Set a new dataset with county data
         var newDataset = {
             label: county+' County',
-            fill: false,
+            fill: true,
+            fillColor: countyColor(0.6),
             borderColor:  countyColor(0.6),  //"#3e95cd",
             data: data.size
         }
