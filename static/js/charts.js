@@ -19,6 +19,16 @@ const naics_codes = {
     "95": "Auxiliary Establishments",
     "99": "Unclassified" };
 
+function ncColor(op) {
+    // op: opacity (0,1]
+    return `rgba(21, 67, 96, ${op})`
+}
+
+function countyColor(op) {
+    // cty: county number, op: opacity
+    return `rgba(255,12,32,${op})`
+}
+
 /*---------- Initialize Charts -----------------------------------*/
 // Create new Bar Chart (blank data)
 var ctx = document.getElementById('barChart').getContext('2d');
@@ -67,7 +77,7 @@ var myLineChart = new Chart(ctx, {
         },
         title: {
             display: true,
-            text: "Employees of NC from 1986"
+            text: "Employees of NC since 1986"
         }
     }
 });
@@ -77,21 +87,22 @@ var myLineChart = new Chart(ctx, {
 // --- empdata has all counties data
 function empNCbar(empdata) {
 
-    var ncAllcensus = empdata.filter( (d) => d[4] == '999' )
-    ncAllcensus.sort( (a,b) => b[1] - a[1] );
+    var cind = 4 // county index
+    var eind = 1 // emp index
+    var nind = 2 // naics-code index
+
+    var ncInfo = empdata.filter( (d) => d[cind] == '999' )
+    ncInfo.sort( (a,b) => b[eind] - a[eind] );
 
     // Set labels as naics codes    
-    codes = ncAllcensus.map( (x) => naics_codes[x[2]] );
+    codes = ncInfo.map( (x) => naics_codes[x[nind]] );
 
     // Set values as emp numbers
-    values = ncAllcensus.map( (x) => parseInt(x[1]) );
+    values = ncInfo.map( (x) => parseInt(x[eind]) );
 
     //---- remove the entry for total '00'
     codes = codes.slice(1);
     values = values.slice(1);
-
-    // Set colors for the bars
-    var colors = codes.map( (d) => 'rgba(21, 67, 96, 0.6)' );
 
     // Updating chart with new data
     myBarChart.data.labels = codes;
@@ -99,7 +110,7 @@ function empNCbar(empdata) {
         dataset.label = codes.map( (c) => c);
         dataset.data = values.map( (d) => d);
         console.log(dataset.data);
-        dataset.backgroundColor = colors.map( (cl) => cl );
+        dataset.backgroundColor = codes.map( (d) => ncColor(0.6) );
     });
     myBarChart.update();
 }
@@ -122,64 +133,80 @@ function empNCtimeline(year) {
         myLineChart.data.labels = years;
         myLineChart.data.datasets.forEach((dataset) => {
            dataset.data = values.map( (v) => v );
-           dataset.borderColor= 'rgba(21, 67, 96, 1)';
+           dataset.borderColor= ncColor(1);
        });
        myLineChart.update();
-    });
-
-       
+    });       
 }
 
-function countyCharts(county, census) {
+function countyCharts(year, county, census) {
 
-    //---- Update the bar chart: on the nc bar chart, adding county data
-    countyData = getCountyData(county, census)
+    //-- Update the bar chart
 
-    //---- Update the line chart: on the nc line chart, adding county line
+    var cind = 4 // county index
+    var eind = 1 // emp index
+    var nind = 2 // naics-code index
 
+    d3.json("datasets/combined_county_codes.json", function(codes){
+
+        // Get the county number for census and adjust the length of string
+        var countyNbr = codes[county].Census_NBR;
+        if (countyNbr.length < 3) { countyNbr = "0"+countyNbr; }
+
+        // Get the info for the county
+        var countyInfo = census.filter( (dt) => dt[cind] == countyNbr );
+    
+        // Sort the info by emp number in descending orger
+        countyInfo.sort( (a,b) => b[eind] - a[eind] );
+    
+        // Set labels as naics codes    
+        codes = countyInfo.map( (x) => naics_codes[x[nind]] );
+    
+        // Set values as emp numbers
+        values = countyInfo.map( (x) => parseInt(x[eind]) );
+    
+        // Remove the entry for total '00'
+        codes = codes.slice(1);
+        values = values.slice(1);
+        
+        // Set a new dataset with the county info
+        var newDataset = {
+            label: county+' County',
+            backgroundColor:  codes.map( (d) => countyColor(0.6) ),
+            data: values
+        }
+        // Updating chart with new data
+        myBarChart.data.labels = codes;
+        myBarChart.data.datasets.forEach((dataset) => {
+            dataset.label = codes.map( (c) => c);
+            dataset.data = values.map( (d) => d);
+            dataset.backgroundColor = codes.map( (d) => ncColor(0.6) );
+        });
+        myBarChart.update();
+    })
+
+    //- Update the line chart
     var url = "http://127.0.0.1:5000//get_county_data/"+county;
     d3.json(url, function(data) {
-
         // Removing existing county data in the chart
         if (myLineChart.data.datasets.length > 1 ) {
-            myBarChart.data.labels.pop();
             myLineChart.data.datasets.pop();
         }
-        
-        //updating existing line chart look
+
+        // Updating existing chart look
         myLineChart.data.datasets.forEach( (dataset) => {
             dataset.label = 'NC State-wide'
-            dataset.borderColor = 'rgba(21, 67, 96, 0.6)'
         });
-        //adding county data
+
+        // Set a new dataset with county data
         var newDataset = {
-            label: county+'County',
+            label: county+' County',
             fill: false,
-            borderColor:  'rgba(255,12,32,0.6)',  //"#3e95cd",
+            borderColor:  countyColor(0.6),  //"#3e95cd",
             data: data.size
         }
         myLineChart.data.datasets.push(newDataset);
         myLineChart.options.legend.display = true;
         myLineChart.update();
     });
-}
-
-function getCountyData(county, census) {
-
-    //set the index
-    // cind : county index
-    // ein : emp index
-    // nind : nicas code index
-    var cind = 3 
-    var eind = 1
-    var nind = 2
-    var result = []
-
-    console.log(census);
-    d3.json("datasets/combined_county_codes.json", function(codes){
-        console.log("in getCountyData", county, codes);
-        var countyNbr = codes[county].Census_NBR;
-        console.log("nbr", countyNbr);
-    })
-
 }

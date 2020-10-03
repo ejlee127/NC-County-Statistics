@@ -79,11 +79,11 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   accessToken: API_KEY
 }).addTo(myMap);
 
-function change_panels(county, year_emp) {
+function change_panels(county, year, year_emp) {
 
   // holding function to change the side panels.
   console.log(county);
-  countyCharts(county, year_emp);
+  countyCharts(year, county, year_emp);
 
   return;
 }
@@ -261,7 +261,7 @@ function buildMap(year) {
               // myMap.fitBounds(event.target.getBounds())
               // console.log(this.feature.properties);
               //change_panels(this.feature.properties.CNTY_NBR);
-              change_panels(this.feature.properties.CountyName, county_info);
+              change_panels(this.feature.properties.CountyName, year, county_info);
             }
           });
           // Giving each feature a pop-up with information pertinent to it
