@@ -7,6 +7,7 @@ from pymongo import MongoClient
 from gridfs import GridFS
 from bson import objectid, json_util, BSON
 import census as ce
+import csv 
 
 
 
@@ -229,6 +230,58 @@ def get_years():
 
     #return jsonify(years)
     return jsonify(recent_years)
+
+@app.route("/get_population/<year>/<county>", methods=['GET'])
+@cross_origin()
+def get_population(year,county):
+    # set the population to 0 as the default
+    population = 0
+    # the data starts with year 2010 and the index of 1.  Subtract 2009 from the years to get index
+    # into the list item.
+    year_index = int(year) - 2009
+
+
+    # opening the CSV file
+    with open('./datasets/countytotals_2010_2019.csv', mode='r')as file:
+
+        # reading the CSV file
+        csvFile = csv.reader(file)
+
+        # loop throughthe file to find the county or full state depending on the input request.
+        for lines in csvFile:
+
+            # The first item of the list is the name of the county or the word STATE.
+            if county == lines[0]:
+                population = lines[year_index]
+            
+    return jsonify(population)
+
+@app.route("/get_pop/<year>", methods=['GET'])
+@cross_origin()
+def get_pop(year):
+    # the data starts with year 2010 and the index of 1.  Subtract 2009 from the years to get index
+    # into the list item.
+    year_index = int(year) - 2009
+    result = {}
+    # opening the CSV file
+    with open('./datasets/countytotals_2010_2019.csv', mode='r')as file:
+
+        # reading the CSV file
+        csvFile = csv.reader(file)
+
+        # skip the initial line
+        next(csvFile)
+        next(csvFile)
+        next(csvFile)
+        next(csvFile)
+
+        for lines in csvFile:
+
+           #put the data into a dioctionary
+
+           result[lines[0]] = lines[year_index]
+            
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run()
