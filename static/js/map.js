@@ -222,7 +222,7 @@ function chooseColor(county, county_info) {
 
 function buildMap(year) {
 
-  //empNCtimeline(year);
+  empNCtimeline(year);
 
   // Use this link to get the geojson data.
   var link = "http://127.0.0.1:5000/get_geo"
