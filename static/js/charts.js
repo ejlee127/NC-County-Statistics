@@ -205,17 +205,33 @@ function countyCharts(year, county, census) {
         // Updating existing chart look
         myLineChart.data.datasets.forEach( (dataset) => {
             dataset.label = 'NC State-wide'
+            dataset.backgroundColor= ncColor(0.5)
         });
 
         // Set a new dataset with county data
         var newDataset = {
             label: county+' County',
             fill: false,
-            fillColor: countyColor(0.6),
+            fillColor: countyColor(0.5),
+            backgroundColor: countyColor(0.5),
             borderColor:  countyColor(0.6),  //"#3e95cd",
             data: data.size
         }
         myLineChart.data.datasets.push(newDataset);
+        /*
+        myLineChart.options.scales = {
+            xAxes: [{
+                display: true
+            }],
+            yAxes: [{
+                display: true,
+                type: 'logarithmic',
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Log. Employee Numbers'
+                }
+            }]
+        };*/
         myLineChart.options.legend = {
             display : true,
             fillStyle: 'rgb(255,255,255'
