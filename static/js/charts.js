@@ -19,6 +19,8 @@ const naics_codes = {
     "95": "Auxiliary Establishments",
     "99": "Unclassified" };
 
+/**  CHart styling functions */
+
 function ncColor(op) {
     // op: opacity (0,1]
     return `rgba(21, 67, 96, ${op})`
@@ -38,21 +40,20 @@ var myBarChart = new Chart(ctx, {
         labels: '',
         datasets: [{
             label: '',
-            barPercentage: 0.7,
-            barThickness: 'flex',
-            maxBarThickness: 12,
-            backgroundColor: [],
-            //minBarLength: 2,
             data: []
         }]
     },
     options: {
         legend: { 
             display: false
+        },
+        title: {
+            display: true,
+            text: "Employees of Sectors"
         }
     }
 });
-// Create new Line Chart (blank data)
+// Create new Line Chart 
 ctx = document.getElementById('lineChart').getContext('2d');
 var myLineChart = new Chart(ctx, {
     type: 'line',
@@ -60,14 +61,6 @@ var myLineChart = new Chart(ctx, {
         labels: '',
         datasets: [{
             label: '',
-            fill: false,
-            fillColor: ncColor(0.6),
-            //strokeColor: "rgba(255,12,32,1)",
-            //pointColor: "rgba(255,12,32,1)",
-            //pointStrokeColor: "#fff",
-            borderColor:  'rgba(21, 67, 96, 1)',  //"#3e95cd",
-            //pointHighlightFill: "#fff",
-            //pointHighlightStroke: "rgba(255,12,32,1)",
             data: []
         }]
     },
@@ -85,53 +78,71 @@ var myLineChart = new Chart(ctx, {
 
 // Find total number of employees for each business category
 // --- empdata has all counties data
-function empNCbar(empdata) {
+function empNCbar(year) {
 
-    var cind = 4 // county index
     var eind = 1 // emp index
     var nind = 2 // naics-code index
 
-    var ncInfo = empdata.filter( (d) => d[cind] == '999' )
-    console.log("in NCbar", ncInfo)
-    ncInfo.sort( (a,b) => b[eind] - a[eind] );
+    url = "http://127.0.0.1:5000//get_nc_data/" + year;
 
-    // Set labels as naics codes    
-    codes = ncInfo.map( (x) => naics_codes[x[nind]] );
+    d3.json(url, function(data) {
 
-    // Set values as emp numbers
-    values = ncInfo.map( (x) => parseInt(x[eind]) );
+        
+        // Remove the first row - column names and second row-total number
+        ncInfo = data.result.slice(2);
+        console.log("in NCbar", ncInfo)
 
-    //---- remove the entry for total '00'
-    codes = codes.slice(1);
-    values = values.slice(1);
+        // Sort the array by emp numbers
+        ncInfo.sort( (a,b) =>  parseInt(b[eind]) - parseInt(a[eind]) );
 
-    // Updating chart with new data
-    myBarChart.data.labels = codes;
-    myBarChart.data.datasets.forEach((dataset) => {
-        dataset.label = codes.map( (c) => c);
-        dataset.data = values.map( (d) => d);
-        console.log(dataset.data);
-        dataset.backgroundColor = codes.map( (d) => ncColor(0.6) );
+        // Set labels as naics codes    
+        codes = ncInfo.map( (x) => naics_codes[x[nind]] );
+
+        // Set values as emp numbers
+        values = ncInfo.map( (x) => parseInt(x[eind]) );
+
+        console.log("value", values)
+        //---- remove the entry for total '00'
+        //codes = codes.slice(1);
+        //values = values.slice(1);
+
+        // Updating chart with new data
+        //myBarChart.data.datasets.pop();
+        myBarChart.data.labels = codes.map( (c) => c);
+        myBarChart.data.datasets.forEach((dataset) => {
+            dataset.label = '';
+            dataset.data = values.map( (d) => d);
+            dataset.backgroundColor = codes.map( (d) => ncColor(0.6) )
+        });
+        myBarChart.options.legend.display = false;
+        myBarChart.update();
     });
-    myBarChart.options.legend.display = false;
-    myBarChart.update();
 }
 
 // Line chart of total employees of years from 1986 to the given year.
 function empNCtimeline(year) {
 
-    url = "http://127.0.0.1:5000//get_nc_data/";
+    url = "http://127.0.0.1:5000//get_nc_total/" + year;
 
     d3.json(url, function(data){
+        console.log("in NCline", data);
+        /*
         var selData = data.filter( (d) => parseInt(d[0]) <= parseInt(year) );
         var years = selData.map( (d) => d[0] );
-        var values = selData.map( (d) => parseInt(d[1]) );
+        var values = selData.map( (d) => parseInt(d[1]) );*/
+        values = data.size;
+        years = data.year;
+
+        console.log(values);
 
         // Updating chart with new data
+        //myLineChart.data.datasets.pop();
         myLineChart.data.labels = years;
         myLineChart.data.datasets.forEach((dataset) => {
-           dataset.data = values.map( (v) => v );
-           dataset.borderColor= ncColor(1);
+            dataset.label = '';
+            dataset.data = values.map( (d) => d);
+            dataset.borderColor = ncColor(1);
+            dataset.fill = false
         });
         myLineChart.options.legend.display = false;
         myLineChart.update();
@@ -190,6 +201,7 @@ function countyCharts(year, county, census) {
             myLineChart.data.datasets.pop();
         }
 
+        console.log("county line", data.size)
         // Updating existing chart look
         myLineChart.data.datasets.forEach( (dataset) => {
             dataset.label = 'NC State-wide'
@@ -198,13 +210,16 @@ function countyCharts(year, county, census) {
         // Set a new dataset with county data
         var newDataset = {
             label: county+' County',
-            fill: true,
+            fill: false,
             fillColor: countyColor(0.6),
             borderColor:  countyColor(0.6),  //"#3e95cd",
             data: data.size
         }
         myLineChart.data.datasets.push(newDataset);
-        myLineChart.options.legend.display = true;
+        myLineChart.options.legend = {
+            display : true,
+            fillStyle: 'rgb(255,255,255'
+        }
         myLineChart.update();
     });
 }

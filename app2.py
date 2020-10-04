@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from gridfs import GridFS
 from bson import objectid, json_util, BSON
 import census as ce
-
+import csv 
 
 
 years= ['1986','1988','1990','1992','1994','1996','1998','2000','2002','2004','2006','2008','2010','2012','2013','2014','2015','2016','2017','2018']
@@ -138,6 +138,26 @@ def reload_census():
 
     return result
 
+@app.route("/reload_nccensus", methods=["GET"])
+@cross_origin()
+def reload_nccensus():
+ 
+    censuscol = mongo.db.nccensus
+#    test = ['2012','2018']
+
+    for year in years:
+        myquery = { "year": year }
+        x = censuscol.count_documents(myquery)
+        if x == 0:
+            responseJson = ce.emp_by_year_NC(int(year))
+            censusyear = {"year": year, "result" : responseJson}
+            censuscol.insert(censusyear)
+            result = "new"
+        else:  # don't refresh if we have the data.  Eventually we would want to change this
+            result = "existing"
+
+    return result
+
 
 @app.route("/get_census/<year>", methods=['GET'])
 @cross_origin()
@@ -173,34 +193,45 @@ def get_county_data(county):
                     "size": result}
     return jsonify(county_info)
 
-@app.route("/get_NC_data/<year>", methods=['GET'])
+# For given year(2012~), return state-wide employees of each sector
+@app.route("/get_nc_data/<year>", methods=['GET'])
 @cross_origin()
-def get_NC_data(year):
+def get_nc_data(year):
 
+    censuscol = mongo.db.nccensus
+    myquery = { "year": year }
+    x = censuscol.count_documents(myquery)
+    if x == 0:  # need to change to call refresh
+        result = "none"
+    else:
+        censusdoc = censuscol.find_one(myquery)
+        censusjson = json.loads(json_util.dumps(censusdoc))
+        result = jsonify(censusjson)
+    return result
 
-
-@app.route("/get_nc_data/", methods=['GET'])
+# Return total employee numbers of NC of from 1986 to the given year
+@app.route("/get_nc_total/<year>", methods=['GET'])
 @cross_origin()
-def get_nc_data():
+def get_nc_total(year):
     # set the index
     # sector : sub sectors exist or not
     # cind : county index
     # ein : emp index
     # nind : nicas code index
     sector = False
-    cind = 3 
     eind = 1
     nind = 2
+    yrs = []
     result = []
 
 #    test = ['2002','2004']
-    for year in years:
-        # there is no '999' entry for 2017,2018
-        if int(year) >= 2017:
-            break
+    for yr in years:
         
-        censuscol = mongo.db.census
-        myquery = { "year": year }
+        if int(yr) > int(year):
+            break
+
+        censuscol = mongo.db.nccensus
+        myquery = { "year": yr }
         x = censuscol.count_documents(myquery)
         if x == 0:  # pull the county information
             result.append(0)
@@ -208,26 +239,30 @@ def get_nc_data():
             censusdoc = censuscol.find_one(myquery,{ "_id": 0, "result": 1 })
             censusjson = json.loads(json_util.dumps(censusdoc))
 
-            if (int(year) >= 1998):
-                cind = 4
+            if (int(yr) > 1997):
                 eind = 2
-                if (int(year) >= 2012 ):
-                    sector = True
-                    eind = 1           
-            
-            empdata = censusjson['result']
-
-            #Take the total employee number, i.e., when sector number=00
+            if (int(yr) >= 2012 ):
+                sector = True
+                eind = 1           
             
             if (sector):
-                selData = list(filter(lambda d: (d[cind] == '999') & (d[nind] == '00'), empdata))
+                ncemp = censusjson['result']
+                selData = list(filter(lambda d: d[nind] == '00', ncemp))
+                result.append( selData[0][eind]  )
+                #print("yr: ", yr, selData)
             else:
-                selData = list(filter(lambda d: d[cind] == '999', empdata))
+                selData = censusjson['result'][1]
+                result.append( selData[eind]  )
+                #print("yr: ", yr, selData)
 
             # Append data to array
-            result.append( [ year, selData[0][eind] ] )
+            yrs.append(yr)
             
-    return jsonify(result)
+
+    nc_info = {"year" : yrs,
+                "size": result}  
+
+    return jsonify(nc_info)
 
 @app.route("/get_years", methods=['GET'])
 @cross_origin()
@@ -236,5 +271,59 @@ def get_years():
     #return jsonify(years)
     return jsonify(recent_years)
 
+
+@app.route("/get_population/<year>/<county>", methods=['GET'])
+@cross_origin()
+def get_population(year,county):
+    # set the population to 0 as the default
+    population = 0
+    # the data starts with year 2010 and the index of 1.  Subtract 2009 from the years to get index
+    # into the list item.
+    year_index = int(year) - 2009
+
+
+    # opening the CSV file
+    with open('./datasets/countytotals_2010_2019.csv', mode='r')as file:
+
+        # reading the CSV file
+        csvFile = csv.reader(file)
+
+        # loop throughthe file to find the county or full state depending on the input request.
+        for lines in csvFile:
+
+            # The first item of the list is the name of the county or the word STATE.
+            if county == lines[0]:
+                population = lines[year_index]
+            
+    return jsonify(population)
+
+@app.route("/get_pop/<year>", methods=['GET'])
+@cross_origin()
+def get_pop(year):
+    # the data starts with year 2010 and the index of 1.  Subtract 2009 from the years to get index
+    # into the list item.
+    year_index = int(year) - 2009
+    result = {}
+    # opening the CSV file
+    with open('./datasets/countytotals_2010_2019.csv', mode='r')as file:
+
+        # reading the CSV file
+        csvFile = csv.reader(file)
+
+        # skip the initial line
+        next(csvFile)
+        next(csvFile)
+        next(csvFile)
+        next(csvFile)
+
+        for lines in csvFile:
+
+           #put the data into a dioctionary
+
+           result[lines[0]] = lines[year_index]
+            
+    return jsonify(result)
+
 if __name__ == "__main__":
     app.run()
+
