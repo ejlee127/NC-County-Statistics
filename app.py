@@ -283,5 +283,16 @@ def get_pop(year):
             
     return jsonify(result)
 
+@app.route("/get_combined_codes", methods=['GET'])
+@cross_origin()
+def get_combined_codes():
+
+    with open('./datasets/combined_county_codes.json', mode='r')as file:
+
+        # Reading from json file 
+        json_object = json.load(openfile) 
+
+    return json_object
+
 if __name__ == "__main__":
     app.run()
