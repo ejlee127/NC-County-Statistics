@@ -39,12 +39,12 @@ function init_data() {
 }
 
 function fill_in_popup(name, numb, pop, county_d) {
-  pop_html = "<h4>" + name + " (" + numb + ") </h4> <hr> <h5>Employment: ";
+  pop_html = "<h5>" + name + " (" + numb + ") </h5> <hr> <h6>Employment: ";
   var c_emp = determine_size(name, county_d);
-  pop_html = pop_html + c_emp + "</h5> <br> <h5>Total Population: ";
-  pop_html = pop_html + pop[name] + "</h5> <br> <h5>Percentage Employment: "
-  var pop_d = c_emp * 100 / pop[name];
-  pop_html = pop_html + pop_d + "</h5>";
+  pop_html = pop_html + c_emp + "</h6> <br> <h6>Total Population: ";
+  pop_html = pop_html + pop[name] + "</h6> <br> <h6>Employment: "
+  var pop_d = (c_emp * 100 / pop[name]).toFixed(2);
+  pop_html = pop_html + pop_d + "%</h6>";
   return pop_html;
 }
 
