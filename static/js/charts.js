@@ -135,8 +135,12 @@ function empNCtimeline(year) {
 
         console.log(values);
 
+        // Remove the previous county dataset
+        if (myLineChart.data.datasets.length > 1) {
+            myLineChart.data.datasets.pop();
+        };
+
         // Updating chart with new data
-        //myLineChart.data.datasets.pop();
         myLineChart.data.labels = years;
         myLineChart.data.datasets.forEach((dataset) => {
             dataset.label = '';
