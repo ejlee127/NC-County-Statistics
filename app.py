@@ -274,8 +274,11 @@ def get_years():
     return jsonify(recent_years)
 
 @app.route("/get_population/<year>/<county>", methods=['GET'])
+#@app.route("/get_population/<year_county>", methods=['GET'])
 @cross_origin()
-def get_population(year,county):
+def get_population(year, county):
+
+    """
     # set the population to 0 as the default
     population = 0
     # the data starts with year 2010 and the index of 1.  Subtract 2009 from the years to get index
@@ -297,6 +300,23 @@ def get_population(year,county):
                 population = lines[year_index]
             
     return jsonify(population)
+    """
+    #input_str = year_county.split('-')
+    #year = input_str[0]
+    #county = input_str[1]
+    with open("./datasets/counties_pop_1990_2019.csv") as cfile:
+        pp_data = csv.reader(cfile)
+        next(pp_data)
+        sel_pop = list(filter(lambda d: (d[1] == county) & (int(d[0])<=int(year)), pp_data))
+        sel_pop.sort(key=lambda d:d[0])
+        print(sel_pop)
+
+        pop_info = {
+            'year': [d[0] for d in sel_pop],
+            'size': [d[2] for d in sel_pop]
+        }
+    return jsonify(pop_info)
+        
 
 @app.route("/get_pop/<year>", methods=['GET'])
 @cross_origin()

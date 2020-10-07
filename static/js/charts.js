@@ -139,18 +139,31 @@ function empNCtimeline(year) {
         if (myLineChart.data.datasets.length > 1) {
             myLineChart.data.datasets.pop();
         };
-
-        // Updating chart with new data
+        // Updating chart with new data -- employment data
         myLineChart.data.labels = years;
         myLineChart.data.datasets.forEach((dataset) => {
-            dataset.label = '';
+            dataset.label = 'NC Employees';
             dataset.data = values.map( (d) => d);
             dataset.borderColor = ncColor(1);
             dataset.fill = false
         });
-        myLineChart.options.legend.display = false;
+            myLineChart.options.legend.display = true;
         myLineChart.update();
-    });       
+    });
+    // Updating chart with new data - population data
+    /*
+    pop_url = "http://127.0.0.1:5000//get_population/" + year + "/STATE"
+    d3.json(pop_url, function(population){
+        console.log("for pop", population)
+        var newDataSet = {
+            label: 'NC Population',
+            data: population.size,
+            fill: true
+        }
+        myLineChart.data.datasets.push(newDataSet);
+    })
+    */
+
 }
 
 function countyCharts(year, county, census) {
