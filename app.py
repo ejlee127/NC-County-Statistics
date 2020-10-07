@@ -35,15 +35,6 @@ mongo = PyMongo(app)
 db = MongoClient().mygrid 
 fs = GridFS(db)
 
-def order_list(censusJson):
-    ord = {}
-    # put the array into a dictionary format for easier reference in JS
-    for ci in censusJson:
-        # get the county name as the key
-        ckey = ci[0].split()[0]
-        ord[ckey] = ci
-        
-    return ord
 
 def deter_county(result,county,year):
     size = 0
@@ -353,7 +344,6 @@ def get_combined_codes():
 
         # Reading from json file 
         json_object = json.load(file) 
-        print(json_object)
 
     return json_object
 

@@ -138,16 +138,16 @@ def emp_by_year(year):
     return census_data
 
 
-## For given county, collect EMP data for all years
-# example: Wake county = '183'
-def emp_by_county(county):
-    emp_ct = county_all_years(county)
-    emp_ct_df = pd.DataFrame({
-        "County" : [county]*len(emp_ct),
-        "Year" : np.arange(1986,2018),
-        "EMP" : emp_ct
-    })
-    return emp_ct_df
+# ## For given county, collect EMP data for all years
+# # example: Wake county = '183'
+# def emp_by_county(county):
+#     emp_ct = county_all_years(county)
+#     emp_ct_df = pd.DataFrame({
+#         "County" : [county]*len(emp_ct),
+#         "Year" : np.arange(1986,2018),
+#         "EMP" : emp_ct
+#     })
+#     return emp_ct_df
 
 def emp_by_year_NC(year):
         
