@@ -198,7 +198,7 @@ function countyCharts(year, county, census) {
         
         // Set a new dataset with the county info
         var newDataset = {
-            label: county+' County',
+            label: county+' County Employees in ' + year,
             backgroundColor:  codes.map( (d) => countyColor(0.6) ),
             data: values
         }
@@ -213,18 +213,20 @@ function countyCharts(year, county, census) {
     //- Update the line chart
     var url = "http://127.0.0.1:5000/get_county_data/"+county;
     d3.json(url, function(data) {
+        /*
         // Removing existing county data in the chart
         if (myLineChart.data.datasets.length > 1 ) {
             myLineChart.data.datasets.pop();
         }
 
-        console.log("county line", data.size)
+        //console.log("county line", data.size)
         // Updating existing chart look
         myLineChart.data.datasets.forEach( (dataset) => {
             dataset.label = 'NC State-wide'
             dataset.backgroundColor= ncColor(0.5)
         });
-
+        */
+        myLineChart.data.datasets.pop();
         // Set a new dataset with county data
         var newDataset = {
             label: county+' County',
