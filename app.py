@@ -352,7 +352,8 @@ def get_combined_codes():
     with open('./datasets/combined_county_codes.json', mode='r')as file:
 
         # Reading from json file 
-        json_object = json.load(openfile) 
+        json_object = json.load(file) 
+        print(json_object)
 
     return json_object
 
