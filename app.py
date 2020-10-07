@@ -300,7 +300,6 @@ def get_population(year, county):
         next(pp_data)
         sel_pop = list(filter(lambda d: (d[1] == county) & (int(d[0])<=int(year)), pp_data))
         sel_pop.sort(key=lambda d:d[0])
-        print(sel_pop)
         yrs = []
         vls = []
         for yr in years:
@@ -309,15 +308,12 @@ def get_population(year, county):
             if int(yr) < 1990:
                 yrs.append(yr)
                 vls.append(sel_pop[0][2])
-                print(yr, sel_pop[0])
             elif int(yr) < 2000:
                 yrs.append(yr)
                 vls.append(sel_pop[1][2])
-                print(yr, sel_pop[1])
             else:
                 yrs.append(yr)
                 yr_pop = list(filter(lambda d: d[0] == yr, sel_pop))
-                print(yr, yr_pop)
                 vls.append(yr_pop[0][2])
         pop_info = {
             'year': yrs,
