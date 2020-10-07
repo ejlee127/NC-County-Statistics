@@ -115,6 +115,7 @@ function empNCbar(year) {
             dataset.backgroundColor = codes.map( (d) => ncColor(0.6) )
         });
         myBarChart.options.legend.display = false;
+        myBarChart.options.title.text = 'Employees of Sectors in '+year;
         myBarChart.update();
     });
 }
@@ -136,6 +137,7 @@ function empNCtimeline(year) {
         console.log(values);
 
         // Remove the previous county dataset
+        /*
         if (myLineChart.data.datasets.length > 1) {
             myLineChart.data.datasets.pop();
         };
@@ -145,9 +147,19 @@ function empNCtimeline(year) {
             dataset.label = 'NC Employees';
             dataset.data = values.map( (d) => d);
             dataset.borderColor = ncColor(1);
+            dataset.fillColor = ncColor(0.6);
             dataset.fill = false
-        });
-            myLineChart.options.legend.display = true;
+        });*/
+        myLineChart.data.datasets.pop()
+        myLineChart.data.labels = years;
+        myLineChart.data.datasets.push({
+            label : 'NC Employees',
+            data : values.map( (d) => d),
+            borderColor : ncColor(1),
+            backgroundColor:  ncColor(0.5),
+            fill : false
+        })
+        myLineChart.options.legend.display = true;
         myLineChart.update();
     });
     // Updating chart with new data - population data
@@ -198,7 +210,7 @@ function countyCharts(year, county, census) {
         
         // Set a new dataset with the county info
         var newDataset = {
-            label: county+' County Employees in ' + year,
+            label: county+' County',
             backgroundColor:  codes.map( (d) => countyColor(0.6) ),
             data: values
         }
@@ -207,6 +219,7 @@ function countyCharts(year, county, census) {
         myBarChart.data.labels = codes;
         myBarChart.data.datasets.push(newDataset);
         myBarChart.options.legend.display = true;
+        myBarChart.options.title.text = 'Employees of Sectors in '+year;
         myBarChart.update();
     })
 
