@@ -150,7 +150,10 @@ function empNCtimeline(year) {
             dataset.fillColor = ncColor(0.6);
             dataset.fill = false
         });*/
-        myLineChart.data.datasets.pop()
+        while (myLineChart.data.datasets.length > 0) {
+            myLineChart.data.datasets.pop()
+        }
+           
         myLineChart.data.labels = years;
         myLineChart.data.datasets.push({
             label : 'NC Employees',
@@ -160,22 +163,26 @@ function empNCtimeline(year) {
             fill : false
         })
         myLineChart.options.legend.display = true;
-        myLineChart.update();
-    });
-    // Updating chart with new data - population data
-    /*
-    pop_url = "http://127.0.0.1:5000/get_population/" + year + "/STATE"
-    d3.json(pop_url, function(population){
-        console.log("for pop", population)
-        var newDataSet = {
-            label: 'NC Population',
-            data: population.size,
-            fill: true
-        }
-        myLineChart.data.datasets.push(newDataSet);
-    })
-    */
 
+        // Updating chart with new data - population data
+        pop_url = "http://127.0.0.1:5000/get_population/" + year + "/STATE"
+        d3.json(pop_url, function(population){
+            console.log("for pop", population)
+            var newDataSet = {
+                label: 'NC Population',
+                data: population.size,
+                borderwidth: 0.2,
+                borderColor : 'rgba(128, 128, 128, 0.1)',
+                backgroundColor:  'rgba(128, 128, 128, 0.1)',
+                pointRadius: 0,
+                fill: true,
+                cubicInterpolationMode: 'monotone'
+            }
+            myLineChart.data.datasets.push(newDataSet);
+            myLineChart.update();
+        });   
+        //myLineChart.update();
+    });  
 }
 
 function countyCharts(year, county, census) {
@@ -240,9 +247,10 @@ function countyCharts(year, county, census) {
         });
         */
         myLineChart.data.datasets.pop();
+        myLineChart.data.datasets.pop();
         // Set a new dataset with county data
         var newDataset = {
-            label: county+' County',
+            label: 'Total Number of Employees',
             fill: false,
             fillColor: countyColor(0.5),
             backgroundColor: countyColor(0.5),
@@ -250,6 +258,32 @@ function countyCharts(year, county, census) {
             data: data.size
         }
         myLineChart.data.datasets.push(newDataset);
+
+        // Updating chart with new data - population data
+        pop_url = "http://127.0.0.1:5000/get_population/" + year + "/" + county
+        d3.json(pop_url, function(population){
+            console.log("for pop", county, population)
+            var newDataSet = {
+                label: 'Population',
+                data: population.size,
+                borderwidth: 0.2,
+                borderColor : 'rgba(128, 128, 128, 0.1)',
+                backgroundColor:  'rgba(128, 128, 128, 0.1)',
+                pointRadius: 0,
+                fill: true,
+                cubicInterpolationMode: 'monotone'
+            }
+            myLineChart.data.datasets.push(newDataSet);
+            myLineChart.options.legend = {
+                display : true,
+                fillStyle: 'rgb(255,255,255'
+            }
+            myLineChart.options.title = {
+                display : true,
+                text: county + ' County:' + 'Employees since 1986'
+            }
+            myLineChart.update();
+        });   
         /*
         myLineChart.options.scales = {
             xAxes: [{
@@ -264,10 +298,5 @@ function countyCharts(year, county, census) {
                 }
             }]
         };*/
-        myLineChart.options.legend = {
-            display : true,
-            fillStyle: 'rgb(255,255,255'
-        }
-        myLineChart.update();
     });
 }
