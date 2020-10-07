@@ -83,7 +83,7 @@ function empNCbar(year) {
     var eind = 1 // emp index
     var nind = 2 // naics-code index
 
-    url = "http://127.0.0.1:5000//get_nc_data/" + year;
+    url = "http://127.0.0.1:5000/get_nc_data/" + year;
 
     d3.json(url, function(data) {
 
@@ -122,7 +122,7 @@ function empNCbar(year) {
 // Line chart of total employees of years from 1986 to the given year.
 function empNCtimeline(year) {
 
-    url = "http://127.0.0.1:5000//get_nc_total/" + year;
+    url = "http://127.0.0.1:5000/get_nc_total/" + year;
 
     d3.json(url, function(data){
         console.log("in NCline", data);
@@ -152,7 +152,7 @@ function empNCtimeline(year) {
     });
     // Updating chart with new data - population data
     /*
-    pop_url = "http://127.0.0.1:5000//get_population/" + year + "/STATE"
+    pop_url = "http://127.0.0.1:5000/get_population/" + year + "/STATE"
     d3.json(pop_url, function(population){
         console.log("for pop", population)
         var newDataSet = {
@@ -174,8 +174,8 @@ function countyCharts(year, county, census) {
     var eind = 1 // emp index
     var nind = 2 // naics-code index
 
-    d3.json("datasets/combined_county_codes.json", function(codes){
-
+    d3.json("http://127.0.0.1:5000/get_combined_codes", function(codes){
+        console.log(codes,county)
         // Get the county number for census and adjust the length of string
         var countyNbr = codes[county].Census_NBR;
         if (countyNbr.length < 3) { countyNbr = "0"+countyNbr; }
@@ -211,7 +211,7 @@ function countyCharts(year, county, census) {
     })
 
     //- Update the line chart
-    var url = "http://127.0.0.1:5000//get_county_data/"+county;
+    var url = "http://127.0.0.1:5000/get_county_data/"+county;
     d3.json(url, function(data) {
         // Removing existing county data in the chart
         if (myLineChart.data.datasets.length > 1 ) {
