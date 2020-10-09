@@ -103,11 +103,11 @@ function empNCbar(year) {
         // Updating chart with new data
         myBarChart.data.labels = codes.map( (c) => c);
         myBarChart.data.datasets.forEach((dataset) => {
-            dataset.label = '';
+            dataset.label = 'NC statewide';
             dataset.data = values.map( (d) => d);
             dataset.backgroundColor = codes.map( (d) => ncColor(0.6) )
         });
-        myBarChart.options.legend.display = false;
+        myBarChart.options.legend.display = true;
         myBarChart.options.title.text = 'Employees of Sectors in '+year;
         myBarChart.update();
     });
