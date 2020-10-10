@@ -21,7 +21,7 @@ For further images of the dashboard,
 * [Dashboard Page-county selected](images/Screenshot_dashboard2.png)
 * [Bar Chart of Business Sectors](images/Screenshot_bar.png)
 * [TimeLine Chart of Employment](images/Screenshot_line2.png)
-* [TimeLine Chart of Employment with Population](images/images/Screenshot_line.png)
+* [TimeLine Chart of Employment with Population](images/Screenshot_line.png)
 
 
 ### Data sources:
