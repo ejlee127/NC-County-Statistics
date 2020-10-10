@@ -1,3 +1,6 @@
+/*
+Define the Business sector codes and names
+*/
 const naics_codes = {
     //"00": "Total for all sectors",
     "11": "Agri-Food",
@@ -19,15 +22,15 @@ const naics_codes = {
     "95": "Auxiliary Establishments",
     "99": "Unclassified" };
 
-/**  Chart styling functions */
 
+/**  Chart styling functions */
 function ncColor(op) {
-    // op: opacity (0,1]
+    // op: opacity [0,1]
     return `rgba(21, 67, 96, ${op})`
 }
 
 function countyColor(op) {
-    // cty: county number, op: opacity
+    // op: opacity
     return `rgba(255,12,32,${op})`
 }
 
@@ -53,7 +56,7 @@ var myBarChart = new Chart(ctx, {
         }
     }
 });
-// Create new Line Chart 
+// Create new Line Chart (blank data)
 ctx = document.getElementById('lineChart').getContext('2d');
 var myLineChart = new Chart(ctx, {
     type: 'line',
@@ -74,10 +77,16 @@ var myLineChart = new Chart(ctx, {
         }
     }
 });
-/*--------------------------------------------------------------------*/
+/*------- End of Initialization -----*/
 
-// Find total number of employees for each business category
-// --- empdata has all counties data
+//======= Functions ======================
+/* Name: empNCbar
+  Description: This updates the bar chart with the NC employment data of the year.
+  Input:
+    year - year (string)
+  Returns:
+    none
+*/
 function empNCbar(year) {
 
     var eind = 1 // emp index
@@ -113,7 +122,16 @@ function empNCbar(year) {
     });
 }
 
-// Line chart of total employees of years from 1986 to the given year.
+// Line chart of .
+
+
+/* Name: empNCtimeline
+  Description: This updates the line chart with employment and population of years from 1986 to the given year
+  Input:
+    year - year (string)
+  Returns:
+    none
+*/
 function empNCtimeline(year) {
 
     url = "http://127.0.0.1:5000/get_nc_total/" + year;
@@ -174,6 +192,18 @@ function empNCtimeline(year) {
         });
     });  
 }
+
+/* Name: countyCharts
+  Description: This updates, for the county,
+    the bar chart with the employment data of the year and
+    the line chart with the employment and population of years from 1986 to the given year
+  Input:
+    year - year (string)
+    county - county name (string)
+    census - employment data of county
+  Returns:
+    none
+*/
 
 function countyCharts(year, county, census) {
 
@@ -281,6 +311,17 @@ function countyCharts(year, county, census) {
         });   
     });
 }
+
+/* Name: updateLinePopulation
+  Description: This updates the line chart
+    after adding the dataset with the population data
+  Input:
+    myLine - pointer to chart
+    population - population data
+    county - county name
+  Returns:
+    none
+*/
 
 function updateLinePopulation(myLine,population,county){
 
