@@ -38,7 +38,14 @@ mongo = PyMongo(app)
 db = MongoClient().mygrid 
 fs = GridFS(db)
 
-
+#   Name: deter_county  
+#   Description: This populates the pop-up when the county is selected 
+#   Input:
+#     result - json file with the state information
+#     county - country name
+#     year - year to be displayed
+#   Returns:
+#     none
 def deter_county(result,county,year):
     size = 0
     ind = 1
@@ -78,27 +85,33 @@ def deter_county(result,county,year):
         
 #This is not recommended in production
 #What would happen is every time you visit the root route it would load the DB again with all the data
-#
+
+# get the GEOJSON information from mongodb
 @app.route("/get_geo", methods=["GET"])
 def get_geo():
 
     #to acces the data first we need to get the colletion in where the files are stored
     col = db.fs.files.find_one()
+
     # once we have the object storing the file information, we can get the data and read it
     bsdata = fs.get(col["_id"]).read()
+
     # since the data was encode, we need to decode it back
     data = BSON.decode(bsdata)
+
     return jsonify(data)
 
+# call the API to load the nc geo JSON and store into Mongo DB if not there.
 @app.route("/reload_geo", methods=["GET"])
 def reload_geo():
     # check to see if there is an exisitng file.  If so than do not reload
     col = db.fs.files.find_one()
 
+    # status used to verify when calling the route directly.
     status = "existing"
 
     if col == None:
-
+        # if the geojson file is not stored, call the API.
         response = requests.get("https://opendata.arcgis.com/datasets/d192da4d0ac249fa9584109b1d626286_0.geojson")
 
         # GridFS stored BSON binary files, the fucntion to do that is BSON.encode
@@ -112,17 +125,21 @@ def reload_geo():
 
     return status
 
-
+# call the API to load the nc employment and store into Mongo DB if not there.
 @app.route("/reload_census", methods=["GET"])
 @cross_origin()
 def reload_census():
  
+    # access the census collection
     censuscol = mongo.db.census
-#    test = ['2012','2018']
 
+    # loop through the years to pull the information in.
     for year in years:
         myquery = { "year": year }
         x = censuscol.count_documents(myquery)
+
+        # check to see if the year exists in collection.  If so skip otherwise pull into
+        # database from the census API
         if x == 0:
             responseJson = ce.emp_by_year(int(year))
             censusyear = {"year": year, "result" : responseJson}
@@ -133,18 +150,23 @@ def reload_census():
 
     return result
 
-
+# call the API to load the nc population and store into Mongo DB if not there.
 @app.route("/reload_nccensus", methods=["GET"])
 @cross_origin()
 def reload_nccensus():
  
+    # access the nccensus collection
     censuscol = mongo.db.nccensus
-#    test = ['2012','2018']
 
+    # loop through the years to pull the information in.
     for year in years:
         myquery = { "year": year }
         x = censuscol.count_documents(myquery)
+
+        # check to see if the year exists in collection.  If so skip otherwise pull into
+        # database from the census API
         if x == 0:
+            # using functions in census.py, call the API for the year.
             responseJson = ce.emp_by_year_NC(int(year))
             censusyear = {"year": year, "result" : responseJson}
             censuscol.insert(censusyear)
@@ -155,10 +177,14 @@ def reload_nccensus():
     return result
 
 
+# These routes are used to populate the information from the database or files.
+
+# return the nc information for the year.
 @app.route("/get_census/<year>", methods=['GET'])
 @cross_origin()
 def get_census(year):
 
+    # access the census collection given an year
     censuscol = mongo.db.census
     myquery = { "year": year }
     x = censuscol.count_documents(myquery)
@@ -170,11 +196,13 @@ def get_census(year):
         result = jsonify(censusjson)
     return result
 
+# route that returns the county employment information
 @app.route("/get_county_data/<county>", methods=['GET'])
 @cross_origin()
 def get_county_data(county):
     result = []
-#    test = ['2002','2004']
+
+    # loop through the years
     for year in years:
         censuscol = mongo.db.census
         myquery = { "year": year }
@@ -196,8 +224,10 @@ def get_nc_data(year):
 
     censuscol = mongo.db.nccensus
     myquery = { "year": year }
+
+    # check to see if the year exists in collection.  
     x = censuscol.count_documents(myquery)
-    if x == 0:  # need to change to call refresh
+    if x == 0:  # If not future change to handle a call to refresh.
         result = "none"
     else:
         censusdoc = censuscol.find_one(myquery)
@@ -259,45 +289,19 @@ def get_nc_total(year):
                 "size": result}  
 
     return jsonify(nc_info)
-    
+
+# route to pull the years needed for the drop down
 @app.route("/get_years", methods=['GET'])
 @cross_origin()
 def get_years():
 
-    #return jsonify(years)
     return jsonify(recent_years)
 
+# route to pull the county information for that year
 @app.route("/get_population/<year>/<county>", methods=['GET'])
-#@app.route("/get_population/<year_county>", methods=['GET'])
 @cross_origin()
 def get_population(year, county):
 
-    """
-    # set the population to 0 as the default
-    population = 0
-    # the data starts with year 2010 and the index of 1.  Subtract 2009 from the years to get index
-    # into the list item.
-    year_index = int(year) - 2009
-
-
-    # opening the CSV file
-    with open('./datasets/countytotals_2010_2019.csv', mode='r')as file:
-
-        # reading the CSV file
-        csvFile = csv.reader(file)
-
-        # loop throughthe file to find the county or full state depending on the input request.
-        for lines in csvFile:
-
-            # The first item of the list is the name of the county or the word STATE.
-            if county == lines[0]:
-                population = lines[year_index]
-            
-    return jsonify(population)
-    """
-    #input_str = year_county.split('-')
-    #year = input_str[0]
-    #county = input_str[1]
     with open("./datasets/counties_pop_1990_2019.csv") as cfile:
         pp_data = csv.reader(cfile)
         next(pp_data)
@@ -324,7 +328,7 @@ def get_population(year, county):
         }
     return jsonify(pop_info)
         
-
+# route to pull the population for the year identified.
 @app.route("/get_pop/<year>", methods=['GET'])
 @cross_origin()
 def get_pop(year):
@@ -338,7 +342,7 @@ def get_pop(year):
         # reading the CSV file
         csvFile = csv.reader(file)
 
-        # skip the initial line
+        # skip the initial 4 lines of data
         next(csvFile)
         next(csvFile)
         next(csvFile)
@@ -347,7 +351,6 @@ def get_pop(year):
         for lines in csvFile:
 
            #put the data into a dioctionary
-
            result[lines[0]] = lines[year_index]
             
     return jsonify(result)
