@@ -3,9 +3,6 @@
 
 init_data();
 
-empNCbar(2014);
-empNCtimeline(2014);
-
 /* function to generate initial pull of the data to be stored in Mongodb.   
   Input:
     None
@@ -41,6 +38,8 @@ function init_data() {
   // Perform an API call to the get the data into MongoDB
   d3.json(url, function (call_status) {
     console.log("nc",call_status);
+    empNCbar(2014);
+    empNCtimeline(2014);
   });
 
   return;
