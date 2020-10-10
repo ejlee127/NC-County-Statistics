@@ -50,7 +50,7 @@ For further images of the dashboard,
 ## Data and Functions Flow:
    The page runs over the back-end server which uses Python Flask and MongoDB. The front-end page is built using Javascript and HTML along with the tools D3, Leaflet, Mapbox, HTML, Bootstrap and ChartJS.
 
-   The overall data flow is displayed in the diagram [Data Flow Diagram](images/HighLevel%20FLow.png).
+   The overall data flow is displayed in the diagram [Data Flow Diagram](images/HighLevel%20FLow.jpeg).
 
    The data flow among the functions is displayed in the detailed diagram [Function Flow Diagram](images/Function%20Flow.jpeg)
 
