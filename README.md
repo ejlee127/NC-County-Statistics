@@ -14,14 +14,14 @@ The dashboard provides a map centered in North Carolina and charts visibly with 
 
 ## Screenshots of Page:
 
-![Dashboard Page-year selected](images/Sceenshot_dashboard.png)
+![Dashboard Page-year selected](images/Screenshot_dashboard.png)
 
 For further images of the dashboard,
 
-* [Dashboard Page-county selected](images/)
-* [Bar Chart of Business Sectors](images/Screenshot_bar_chart.png)
-* [TimeLine Chart of Employment]()
-* [TimeLine Chart of Employment with Population](images/images/Screenshot_line_chart.png)
+* [Dashboard Page-county selected](images/Screenshot_dashboard2.png)
+* [Bar Chart of Business Sectors](images/Screenshot_bar.png)
+* [TimeLine Chart of Employment](images/Screenshot_line2.png)
+* [TimeLine Chart of Employment with Population](images/images/Screenshot_line.png)
 
 
 ### Data sources:
