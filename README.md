@@ -19,8 +19,11 @@ The dashboard provides a map centered in North Carolina and charts visibly with 
 For further images of the dashboard,
 
 * [Dashboard Page-county selected](images/Screenshot_dashboard2.png)
+
 * [Bar Chart of Business Sectors](images/Screenshot_bar.png)
+
 * [TimeLine Chart of Employment](images/Screenshot_line2.png)
+
 * [TimeLine Chart of Employment with Population](images/Screenshot_line.png)
 
 
@@ -62,8 +65,10 @@ The back-end provides the following api routes accessed from static/js/map.js an
 
       `/reload_geo`
          loading the NC county map geojson data to MongoDB mygrid database
+         
       `/reload_census`
          loading the county employment data to MongoDB censusdb-census collection
+         
       `/reload_nccensus`
          loading the statewide employment data to MongoDB censusdb-nccensus collection
 
@@ -71,6 +76,7 @@ The back-end provides the following api routes accessed from static/js/map.js an
 
       `/get_geo`
          getting the NC county map data
+         
       `/get_combined_codes`
          getting the county codes
 
@@ -78,10 +84,13 @@ The back-end provides the following api routes accessed from static/js/map.js an
 
       `/get_census/<year>`
          getting the employment data for all counties of the given year
+         
       `/get_county_data/<county>`
          getting the given county's employment data for all years (1986~2018)
+         
       `/get_nc_data/<year>`
          getting the employment data for NC of the given year
+         
       `/get_nc_total/<year>`
          getting the statewide employment data from 1986 upto the given year
 
@@ -89,6 +98,7 @@ The back-end provides the following api routes accessed from static/js/map.js an
 
       `/get_population/<year>/<county>`
          getting the given county's population of the given year
+         
       `/get_pop/<year>`
          getting the population data for all counties of the given year
 
