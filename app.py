@@ -93,11 +93,15 @@ def get_geo():
     #to acces the data first we need to get the colletion in where the files are stored
     col = db.fs.files.find_one()
 
+    if col == None:
+        print("GeoJSON is still loading please wait and reselect year")
+        data = {}
+    else:
     # once we have the object storing the file information, we can get the data and read it
-    bsdata = fs.get(col["_id"]).read()
+        bsdata = fs.get(col["_id"]).read()
 
-    # since the data was encode, we need to decode it back
-    data = BSON.decode(bsdata)
+        # since the data was encode, we need to decode it back
+        data = BSON.decode(bsdata)
 
     return jsonify(data)
 
@@ -106,9 +110,6 @@ def get_geo():
 def reload_geo():
     # check to see if there is an exisitng file.  If so than do not reload
     col = db.fs.files.find_one()
-
-    # status used to verify when calling the route directly.
-    status = "existing"
 
     if col == None:
         # if the geojson file is not stored, call the API.
@@ -120,10 +121,7 @@ def reload_geo():
         # then we store it with the put()
         fs.put(geojson)
 
-        # set the status
-        status = "new"
-
-    return status
+    return get_geo()
 
 # call the API to load the nc employment and store into Mongo DB if not there.
 @app.route("/reload_census", methods=["GET"])

@@ -2,7 +2,7 @@
 //init_data();
 
 init_data();
-buildMap(2014);
+
 empNCbar(2014);
 empNCtimeline(2014);
 
@@ -14,6 +14,13 @@ empNCtimeline(2014);
     None
 */
 function init_data() {
+
+  url = "http://127.0.0.1:5000/reload_geo"
+  // Perform an API call to the get the data into MongoDB
+  d3.json(url, function (call_status) {
+    console.log(call_status);
+    buildMap(2014);
+  });
 
   url = "http://127.0.0.1:5000/get_years"
   // Perform an API call to the get the years stored from MongoDB
@@ -34,12 +41,6 @@ function init_data() {
   // Perform an API call to the get the data into MongoDB
   d3.json(url, function (call_status) {
     console.log("nc",call_status);
-  });
-
-  url = "http://127.0.0.1:5000/reload_geo"
-  // Perform an API call to the get the data into MongoDB
-  d3.json(url, function (call_status) {
-    console.log(call_status);
   });
 
   return;
@@ -315,8 +316,6 @@ function buildMap(year) {
       // Perform an API call to get the census daa for the year idnetified
   
       d3.json(url, function (pop_data) {
-  
-      console.log(pop_data);
 
       var county_info = county_data.result;
 
