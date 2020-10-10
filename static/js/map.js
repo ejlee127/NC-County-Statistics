@@ -1,43 +1,78 @@
 
-init_data(); 
+//init_data();
+
+init_data();
+buildMap(2012);
+empNCbar(2012);
+empNCtimeline(2012);
+
+/* function to generate initial pull of the data to be stored in Mongodb.   
+  Input:
+    None
+
+  Returns:
+    None
+*/
 
 function init_data() {
 
   url = "http://127.0.0.1:5000/get_years"
   // Perform an API call to the get the years stored from MongoDB
-  d3.json(url, function(data) {
+  d3.json(url, function (data) {
     console.log(data)
-      //Create the drop down list of subject IDs
+    //Create the drop down list of subject IDs
     document.getElementById("selDataset").innerHTML = generatetxt(data);
 
   });
+
   url = "http://127.0.0.1:5000/reload_census"
-      // Perform an API call to the get the data into MongoDB
-  d3.json(url, function(call_status) {
-      console.log(call_status);
+  // Perform an API call to the get the data into MongoDB
+  d3.json(url, function (call_status) {
+    console.log(call_status);
+  });
+
+  url = "http://127.0.0.1:5000/reload_nccensus"
+  // Perform an API call to the get the data into MongoDB
+  d3.json(url, function (call_status) {
+    console.log("nc",call_status);
   });
 
   url = "http://127.0.0.1:5000/reload_geo"
-    // Perform an API call to the get the data into MongoDB
-  d3.json(url, function(call_status) {
+  // Perform an API call to the get the data into MongoDB
+  d3.json(url, function (call_status) {
     console.log(call_status);
   });
 
   return;
 }
 
-function fill_in_popup(name, numb,county_d){
-  pop_html = "<h1>" + name + "</h1> <hr> <h2>County Number: " ;
-  pop_html = pop_html + numb + "</h2> <br> <h2>Employment: " ;
-  var c_emp = determine_size(name,county_d);
-  pop_html = pop_html + c_emp;
+/* Name: fill_in_popup.  
+  Description: This populates the pop-up when the county is selected 
+  Input:
+    name - county name
+    numb - county number as seen by NC
+    pop - key dataset of the population number for the counties
+    county_d - array dataset of the census showing county data
+
+  Returns:
+    pop_html - text string with html encoding for the pop-up
+*/
+function fill_in_popup(name, numb, pop, county_d) {
+  pop_html = "<h5>" + name + " (" + numb + ") </h5> <hr> <h6>Employment: ";
+  var c_emp = determine_size(name, county_d);
+  pop_html = pop_html + c_emp + "</h6> <br> <h6>Total Population: ";
+  pop_html = pop_html + pop[name] + "</h6> <br> <h6>Employment: "
+  var pop_d = (c_emp * 100 / pop[name]).toFixed(2);
+  pop_html = pop_html + pop_d + "%</h6>";
   return pop_html;
 }
 
 
 function optionChanged(value) {
   buildMap(value);
-  
+  empNCbar(value);
+  empNCtimeline(value);
+
 }
 
 
@@ -59,7 +94,7 @@ function generatetxt(keylist) {
     text += "<option>" + keylist[i] + "</option>";
   }
   return text
-} 
+}
 
 
 // Creating map object
@@ -79,58 +114,100 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   accessToken: API_KEY
 }).addTo(myMap);
 
-function change_panels(county_number) {
+
+/* Name: change_panels  
+  Description: Controls the selection of a county on the screen.  
+  Input:
+    county - county name
+    year - year selected
+    year_emp - array dataset of the census showing county data
+
+  Returns:
+    None
+*/
+function change_panels(county, year, year_emp) {
 
   // holding function to change the side panels.
-  console.log(county_number)
+  console.log(county);
+  countyCharts(year, county, year_emp);
+
   return;
 }
 
-function determine_size(county,county_d) {
+/* Name: determine_size
+  Description: This returns the size of the county based on the identified year
+  in the census.  
+  Input:
+    county - county name
+    county_d - array dataset of the census showing county data
+
+  Returns:
+    size - This provides size of the county employees
+*/
+
+function determine_size(county, county_d) {
 
 
   var size = 0;
   var ind = 1;
   var name_ind = 0;
-
+  // determine the type of data that we are looking at.  check to see the codes being used.
   if (county_d[0][2] == 'NAICS2012' || county_d[0][2] == 'NAICS2017') {
+    // if the latest data formats then we see the number of employees, plus the number of employees
+    // per sector.  See charts.js for the break down in the sectors.  In this case we want to look for
+    // a sector of 00 which is for the whole county.
+
     county = county + " County, North Carolina";
-    for (var i= 1;i < county_d.length-1; i++) {
-     if (county === county_d[i][name_ind] && '00' === county_d[i][2]) {
-       size = parseInt(county_d[i][ind]);
-     }
+    for (var i = 1; i < county_d.length - 1; i++) {
+      // loop through the data and pull the information from the census document in memory
+      if (county === county_d[i][name_ind] && '00' === county_d[i][2]) {
+        size = parseInt(county_d[i][ind]);
+      }
     }
-   }
-    else {
-
-     if (county_d[0][0] == 'NAICS1997_TTL' || county_d[0][0] == 'NAICS2002_TTL' || county_d[0][0] == 'NAICS2007_TTL' ) {
-
+  }
+  else {
+    if (county_d[0][0] == 'NAICS1997_TTL' || county_d[0][0] == 'NAICS2002_TTL' || county_d[0][0] == 'NAICS2007_TTL') {
+      //  The older years only have the total number per county and have multiple formats.  Set up
+      // the variables - ind which is the index to where the employment number is
+      // - name_ind is the index for the name of the county
+      // - county is the format of the county name
       ind += 1;
       name_ind += 1;
       suffix = county_d[1][name_ind].split(" ");
-      if (suffix.length == 3){
+      if (suffix.length == 3) {
         county = county + " County, NC";
       }
       else if (suffix.length == 4) {
-        county = county +  ' County, North Carolina'
+        county = county + ' County, North Carolina'
       }
-      else    {
+      else {
         county = county + ", NC";
       }
-     }
-     else {
-       county = county + " County, NC";
-     }
-     for (var i= 1;i < county_d.length-1; i++){ 
+    }
+    else {
+      county = county + " County, NC";
+    }
+
+    // once the needed variables are configured, find the population for the county.
+    for (var i = 1; i < county_d.length - 1; i++) {
       if (county === county_d[i][name_ind]) {
         size = parseInt(county_d[i][ind]);
       }
     }
-    }
-    return size;
-   }
+  }
+  return size;
+}
 
+/* Name: chooseColor  
+  Description: This populates the color for the county based on the size identified
+  in the census.
+  Input:
+    county - county name
+    county_info - array dataset of the census showing county data
 
+  Returns:
+    result - color of the county
+*/
 // Function that will determine the color of a county based on the number of employees it has
 function chooseColor(county, county_info) {
   var result;
@@ -168,68 +245,85 @@ function chooseColor(county, county_info) {
       result = "#ffff66";
       break;
     default:
-     size1 = size1 / 10;
-     switch (parseInt(size1)) {
-       case 0:
-         result = "#ffd966";
-         break;
-       case 1:
-         result = "#ffb366";
-         break;
-       case 2:
-         result = "#ff8c66";
-         break;
-       case 3:
-         result = "#ff6666";
-         break;
-       case 4:
-         result = "#ff668c";
-         break;
-       case 5:
-         result = "#ff66b3";
-         break;
-       case 6:
-         result = "#ff66d9";
-         break;
-       case 7:
-         result = "#ff66ff";
-         break;
-       case 8:
-         result = "#d966ff";
-         break;
-       case 9:
-         result = "#b366ff";
-         break;
-       default:
-         result = "#8c66ff"
-     }                  
- }
-   return result;
- }
+      size1 = size1 / 10;
+      switch (parseInt(size1)) {
+        case 0:
+          result = "#ffd966";
+          break;
+        case 1:
+          result = "#ffb366";
+          break;
+        case 2:
+          result = "#ff8c66";
+          break;
+        case 3:
+          result = "#ff6666";
+          break;
+        case 4:
+          result = "#ff668c";
+          break;
+        case 5:
+          result = "#ff66b3";
+          break;
+        case 6:
+          result = "#ff66d9";
+          break;
+        case 7:
+          result = "#ff66ff";
+          break;
+        case 8:
+          result = "#d966ff";
+          break;
+        case 9:
+          result = "#b366ff";
+          break;
+        default:
+          result = "#8c66ff"
+      }
+  }
+  return result;
+}
 
+/* Name: buildMap  
+  Description: This populates the pop-up when the county is selected 
+  Input:
+    year - year to be displayed
+
+  Returns:
+    none
+*/
 function buildMap(year) {
 
-  url = "http://127.0.0.1:5000/get_census/" + year
-      // Perform an API call to get the census daa for the year idnetified
+  //empNCtimeline(year);
 
-  d3.json(url, function(county_data) {
+  // Use this link to get the geojson data.
+  var link = "http://127.0.0.1:5000/get_geo"
 
-    var county_info = county_data.result;
-    //console.log(county_data.result);
+  // Grabbing our GeoJSON data..
+  d3.json(link, function (data) {
+
+    url = "http://127.0.0.1:5000/get_census/" + year
+
+    // Perform an API call to get the census daa for the year idnetified
+    d3.json(url, function (county_data) {
+
+      // Build the API to get the total population in memory  
+      url = "http://127.0.0.1:5000/get_pop/" + year
+      
+      // Perform an API call to get the census daa for the year identified
+      d3.json(url, function (pop_data) {
   
-    // Use this link to get the geojson data.
-    var link = "http://127.0.0.1:5000/get_geo"
+      // console.log(pop_data);
 
-    // Grabbing our GeoJSON data..
-    d3.json(link, function(data) {   
+      // Store the county information into a variable to use later
+      var county_info = county_data.result;
 
-      ncData = empNCxy(county_info);
-      init_barChart(ncData);
+      //empNCbar(county_info);
 
       // Creating a geoJSON layer with the retrieved data
       L.geoJson(data, {
         // Style each feature (in this case a neighborhood)
-        style: function(feature) {
+        style: function (feature) {
           return {
             color: "white",
             // Call the chooseColor function to decide which color to color our neighborhood (color based on borough)
@@ -239,34 +333,36 @@ function buildMap(year) {
           };
         },
         // Called on each feature
-        onEachFeature: function(feature, layer) {
-          // Set mouse events to change map styling
+        onEachFeature: function (feature, layer) {
+          // Set mouse events to change map styling as the mouse rolls over the section
           layer.on({
             // When a user's mouse touches a map feature, the mouseover event calls this function, that feature's opacity changes to 90% so that it stands out
-            mouseover: function(event) {
+            mouseover: function (event) {
               layer = event.target;
               layer.setStyle({
                 fillOpacity: 0.9
               });
             },
             // When the cursor no longer hovers over a map feature - when the mouseout event occurs - the feature's opacity reverts back to 50%
-            mouseout: function(event) {
+            mouseout: function (event) {
               layer = event.target;
               layer.setStyle({
                 fillOpacity: 0.5
               });
             },
             // When a feature (neighborhood) is clicked, it is enlarged to fit the screen
-            click: function(event) {
+            click: function (event) {
               // myMap.fitBounds(event.target.getBounds())
               // console.log(this.feature.properties);
-              change_panels(this.feature.properties.CNTY_NBR);
+              //change_panels(this.feature.properties.CNTY_NBR);
+              change_panels(this.feature.properties.CountyName, year, county_info);
             }
           });
           // Giving each feature a pop-up with information pertinent to it
-          layer.bindPopup(fill_in_popup(feature.properties.CountyName,feature.properties.CNTY_NBR,county_info));
+          layer.bindPopup(fill_in_popup(feature.properties.CountyName, feature.properties.CNTY_NBR, pop_data,county_info));
         }
       }).addTo(myMap);
     });
   });
+});
 }
