@@ -1,7 +1,4 @@
 
-//init_data();
-
-init_data();
 
 /* function to generate initial pull of the data to be stored in Mongodb.   
   Input:
@@ -17,33 +14,37 @@ function init_data() {
   d3.json(url, function (call_status) {
     console.log(call_status);
     buildMap(2014);
-  });
 
-  url = "http://127.0.0.1:5000/get_years"
-  // Perform an API call to the get the years stored from MongoDB
-  d3.json(url, function (data) {
-    console.log(data)
-    //Create the drop down list of subject IDs
-    document.getElementById("selDataset").innerHTML = generatetxt(data);
+    url = "http://127.0.0.1:5000/get_years"
+    // Perform an API call to the get the years stored from MongoDB
+    d3.json(url, function (data) {
+      console.log(data)
+      //Create the drop down list of subject IDs
+      document.getElementById("selDataset").innerHTML = generatetxt(data);
 
-  });
+      url = "http://127.0.0.1:5000/reload_census"
+      // Perform an API call to the get the data into MongoDB
+      d3.json(url, function (call_status) {
+        console.log(call_status);
+        empNCbar(2014);
 
-  url = "http://127.0.0.1:5000/reload_census"
-  // Perform an API call to the get the data into MongoDB
-  d3.json(url, function (call_status) {
-    console.log(call_status);
-  });
+        url = "http://127.0.0.1:5000/reload_nccensus"
+        // Perform an API call to the get the data into MongoDB
+        d3.json(url, function (call_status) {
+          console.log("nc", call_status);
 
-  url = "http://127.0.0.1:5000/reload_nccensus"
-  // Perform an API call to the get the data into MongoDB
-  d3.json(url, function (call_status) {
-    console.log("nc",call_status);
-    empNCbar(2014);
-    empNCtimeline(2014);
+          empNCtimeline(2014);
+        });
+      });
+    });
   });
 
   return;
 }
+
+//init_data();
+
+init_data();
 
 /* Name: fill_in_popup.  
   Description: This populates the pop-up when the county is selected 
