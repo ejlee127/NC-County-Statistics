@@ -2,10 +2,17 @@
 //init_data();
 
 init_data();
-buildMap(2012);
-empNCbar(2012);
-empNCtimeline(2012);
+buildMap(2014);
+empNCbar(2014);
+empNCtimeline(2014);
 
+/* function to generate initial pull of the data to be stored in Mongodb.   
+  Input:
+    None
+
+  Returns:
+    None
+*/
 function init_data() {
 
   url = "http://127.0.0.1:5000/get_years"
@@ -38,6 +45,17 @@ function init_data() {
   return;
 }
 
+/* Name: fill_in_popup.  
+  Description: This populates the pop-up when the county is selected 
+  Input:
+    name - county name
+    numb - county number as seen by NC
+    pop - key dataset of the population number for the counties
+    county_d - array dataset of the census showing county data
+
+  Returns:
+    pop_html - text string with html encoding for the pop-up
+*/
 function fill_in_popup(name, numb, pop, county_d) {
   pop_html = "<h5>" + name + " (" + numb + ") </h5> <hr> <h6>Employment: ";
   var c_emp = determine_size(name, county_d);
@@ -48,7 +66,15 @@ function fill_in_popup(name, numb, pop, county_d) {
   return pop_html;
 }
 
+/* Name: optionChanged  
+  Description: User has selected a year from the drop down.  Call the routines to populate the map
+  and the panels. 
+  Input:
+    value - year from the drop down
 
+  Returns:
+    none
+*/
 function optionChanged(value) {
   buildMap(value);
   empNCbar(value);
@@ -56,8 +82,8 @@ function optionChanged(value) {
 
 }
 
-
-/* function to generate the text for the drop downs.  This function creates a text string
+/* Name: generatetxt  
+  Description:  to generate the text for the drop downs.  This function creates a text string
   used to populate the drop down. 
   Input:
     keylist - array of strings containing the year
@@ -95,6 +121,16 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   accessToken: API_KEY
 }).addTo(myMap);
 
+/* Name: change_panels  
+  Description: Controls the selection of a county on the screen.  
+  Input:
+    county - county name
+    year - year selected
+    year_emp - array dataset of the census showing county data
+
+  Returns:
+    None
+*/
 function change_panels(county, year, year_emp) {
 
   // holding function to change the side panels.
@@ -104,6 +140,16 @@ function change_panels(county, year, year_emp) {
   return;
 }
 
+/* Name: determine_size
+  Description: This returns the size of the county based on the identified year
+  in the census.  
+  Input:
+    county - county name
+    county_d - array dataset of the census showing county data
+
+  Returns:
+    size - This provides size of the county employees
+*/
 function determine_size(county, county_d) {
 
 
@@ -158,19 +204,28 @@ function determine_size(county, county_d) {
 }
 
 
-// Function that will determine the color of a county based on the number of employees it has
+/* Name: chooseColor  
+  Description: This populates the color for the county based on the size identified
+  in the census.
+  Input:
+    county - county name
+    county_info - array dataset of the census showing county data
+
+  Returns:
+    result - color of the county
+*/
 function chooseColor(county, county_info) {
   var result;
   size = determine_size(county, county_info);
   var size1 = size / 1000;
   switch (parseInt(size1)) {
-    case 0:
+    case 0:     //below 1000
       result = "#66ffff";
       break;
-    case 1:
+    case 1:     // 1000 to below 2000
       result = "#66ffd9";
       break;
-    case 2:
+    case 2:     // 2000 to below 3000
       result = "#80ffff";
       break;
     case 3:
@@ -191,19 +246,19 @@ function chooseColor(county, county_info) {
     case 8:
       result = "#d9ff66";
       break;
-    case 9:
+    case 9:     // 9000 to below 10,000
       result = "#ffff66";
       break;
     default:
-      size1 = size1 / 10;
+      size1 = size1 / 45;
       switch (parseInt(size1)) {
-        case 0:
+        case 0:   // 10,000 to below 45,000
           result = "#ffd966";
           break;
-        case 1:
+        case 1:   // 45,000 to below 90,000
           result = "#ffb366";
           break;
-        case 2:
+        case 2:   // 90,000 to below 135,000
           result = "#ff8c66";
           break;
         case 3:
@@ -221,19 +276,26 @@ function chooseColor(county, county_info) {
         case 7:
           result = "#ff66ff";
           break;
-        case 8:
+        case 8:   // 360,000 to below 405,000
           result = "#d966ff";
           break;
-        case 9:
+        case 9:   // 405,000 to below 450,000
           result = "#b366ff";
           break;
-        default:
+        default:  // over 450,000
           result = "#8c66ff"
       }
   }
   return result;
 }
+/* Name: buildMap  
+  Description: This populates the pop-up when the county is selected 
+  Input:
+    year - year to be displayed
 
+  Returns:
+    none
+*/
 function buildMap(year) {
 
   //empNCtimeline(year);
@@ -290,11 +352,9 @@ function buildMap(year) {
                 fillOpacity: 0.5
               });
             },
-            // When a feature (neighborhood) is clicked, it is enlarged to fit the screen
+            // When a county is clicked, present the county information in a pop-up.
+            // Also, change the lower panels to show county information
             click: function (event) {
-              // myMap.fitBounds(event.target.getBounds())
-              // console.log(this.feature.properties);
-              //change_panels(this.feature.properties.CNTY_NBR);
               change_panels(this.feature.properties.CountyName, year, county_info);
             }
           });
