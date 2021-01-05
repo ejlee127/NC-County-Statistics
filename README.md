@@ -4,6 +4,8 @@ North Carolina, especially Triangle, has known as one of the fastest growing are
 
 The dashboard provides a map centered in North Carolina and charts visibly with the number of employed people for the selected years.  Users have option to select a year from 2014 to 2018, and then drill down into the data per county in NC to learn more about each county.
 
+[Deployed at Heroku](https://quiet-peak-17157.herokuapp.com)
+
 ## Team members:
 
 * Niral Patel
